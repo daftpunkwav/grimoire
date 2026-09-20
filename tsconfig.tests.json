@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@grimoire/contracts": ["packages/contracts/src/index.ts"],
+      "@grimoire/foundation": ["packages/foundation/src/index.ts"],
+      "@grimoire/llm": ["services/llm/src/index.ts"],
+      "@grimoire/identity": ["services/identity/src/index.ts"],
+      "@grimoire/content": ["services/content/src/index.ts"],
+      "@grimoire/community": ["services/community/src/index.ts"],
+      "@grimoire/agent": ["services/agent/src/index.ts"],
+      "@grimoire/api/*": ["services/api/src/*"],
+      "@grimoire/web/*": ["apps/web/src/*"]
+    }
+  },
+  "include": [
+    "tests",
+    "packages/*/src",
+    "packages/*/tests",
+    "services/*/src",
+    "services/*/tests",
+    "apps/*/src",
+    "apps/*/tests",
+    "scripts"
+  ]
+}

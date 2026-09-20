@@ -1,0 +1,14 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "services/*"
+
+# Workspace-local install settings
+link-workspace-packages: true
+prefer-workspace-packages: true
+auto-install-peers: true
+shared-workspace-lockfile: true
+save-workspace-protocol: true
+
+# Allow native builds for the small set of packages that need them
+onlyBuiltDependencies: []

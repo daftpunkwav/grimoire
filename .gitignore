@@ -1,0 +1,59 @@
+# --- Dependencies -------------------------------------------------------------
+node_modules/
+
+# --- Build outputs -----------------------------------------------------------
+dist/
+build/
+.next/
+.vite/
+*.tsbuildinfo
+
+# --- Environment -------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- Logs --------------------------------------------------------------------
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- OS ----------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE ---------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+
+# --- Test artifacts ----------------------------------------------------------
+coverage/
+cov-report/
+
+# --- SQLite dev DB (host composition root) -----------------------------------
+services/api/prisma/*.db
+services/api/prisma/*.db-journal
+services/api/prisma/prisma/
+
+# --- Legacy / archived -------------------------------------------------------
+_legacy/
+openwiki/
+
+# --- Local agent instruction overlays (AGENTS.local.md / CLAUDE.local.md) -----
+*.local.md
+
+# --- Runtime / tooling capture ----------------------------------------------
+.playwright-mcp/
+.codegraph/
+.zcode/
+.claude/
+
+# --- Lockfile policy: project uses pnpm ---------------------------------------
+package-lock.json
+
+# --- Local environment files committed historically (now ignored) ------------
+apps/web/.env
+services/api/.env

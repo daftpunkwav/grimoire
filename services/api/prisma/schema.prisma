@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  /// reader | author | admin（游客不入库）
+  role         String   @default("reader")
+  /// none | standard | elite（优秀作者）
+  authorTier   String   @default("none")
+  /// 0=非管理员；1–100，100 超级管理员
+  adminLevel   Int      @default(0)
+  bio          String   @default("")
+  avatarUrl    String   @default("")
+  headline     String   @default("")
+  website      String   @default("")
+  /// 是否允许 Agent 审核批注（作者设置，默认 false 需作者本人审）
+  /// Agent 自动审核尚未接线；人工审核见 /api/v1/annotations
+  allowAgentAnnotationReview Boolean @default(false)
+  /// JSON: { agentStyle, byok, ... }
+  preferences  String   @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  articles       Article[]
+  animations     AnimationDef[]
+  applications   AuthorApplication[]
+  progress       LearningProgress[]
+  agentMemories  AgentMemory[]
+  domainsCreated Domain[]            @relation("DomainCreator")
+  topics         Topic[]
+  topicReplies   TopicReply[]
+  annotations    Annotation[]
+  conversations  AgentConversation[]
+  annotationReviews Annotation[]     @relation("AnnotationReviewer")
+  refreshTokens  RefreshToken[]
+}
+
+// =============================================================================
+// identity 域：User / RefreshToken / AuthorApplication
+// =============================================================================
+
+/// 刷新令牌（仅存 sha256 hash；明文只下发给客户端一次）
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Domain {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String   @default("")
+  /// agent | llm
+  track       String
+  sortOrder   Int      @default(0)
+  color       String   @default("var(--chart-1)")
+  published   Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User?     @relation("DomainCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  articles  Article[]
+
+  @@index([track, sortOrder])
+}
+
+model AuthorApplication {
+  id         String    @id @default(cuid())
+  userId     String
+  /// author | elite
+  kind       String    @default("author")
+  field      String
+  bio        String
+  status     String    @default("pending")
+  /// 仅 pending 时写入 `${userId}:${kind}`，审核后置 null；用于并发唯一约束
+  pendingGuard String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pendingGuard])
+  @@index([userId])
+  @@index([status])
+  @@index([kind, status])
+}
+
+// =============================================================================
+// content 域：Domain / Article / AnimationDef / ArticleAnimation / Annotation
+// 跨域引用只存 ID，不建 FK（Topic.articleId、LearningProgress.articleId）。
+// =============================================================================
+
+model Article {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String    @default("")
+  markdown    String    @default("")
+  category    String
+  level       String    @default("入门")
+  status      String    @default("draft")
+  tags        String    @default("[]")
+  readMinutes Int       @default(5)
+  publishedAt DateTime?
+  viewCount   Int       @default(0)
+  authorId    String
+  domainId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author      User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  domain      Domain?            @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  animations  ArticleAnimation[]
+  annotations Annotation[]
+
+  @@index([status, category])
+  @@index([status, domainId])
+  @@index([authorId])
+  @@index([status, viewCount])
+  @@index([status, publishedAt])
+}
+
+model AnimationDef {
+  id        String   @id @default(cuid())
+  name      String
+  template  String
+  steps     String   @default("[]")
+  config    String   @default("{}")
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  articles ArticleAnimation[]
+
+  @@index([authorId])
+  @@index([template])
+}
+
+model ArticleAnimation {
+  id          String @id @default(cuid())
+  articleId   String
+  animationId String
+  sortOrder   Int    @default(0)
+
+  article   Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  animation AnimationDef @relation(fields: [animationId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, animationId])
+}
+
+// =============================================================================
+// community 域：Topic / TopicReply
+// =============================================================================
+
+/// 话题（社区发帖，可附带文章）
+model Topic {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  /// discussion | question | opinion
+  kind      String   @default("discussion")
+  status    String   @default("open")
+  authorId  String
+  /// 跨域引用 content.Article.id；无 FK，存在性经 ArticleQueryPort 校验
+  articleId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author  User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replies TopicReply[]
+
+  @@index([createdAt])
+  @@index([articleId])
+  @@index([authorId])
+}
+
+model TopicReply {
+  id        String   @id @default(cuid())
+  topicId   String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  topic  Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([topicId])
+}
+
+/// 文章批注（游客只读已通过；读者可写待审；作者/管理员审核）
+/// articleId 为本域 Article 的 FK（content 内部，非跨域）
+model Annotation {
+  id          String   @id @default(cuid())
+  articleId   String
+  userId      String
+  /// 锚定选中文本
+  anchorText  String   @default("")
+  /// 可选段落 / 章节 id
+  sectionId   String   @default("")
+  body        String
+  /// pending | approved | rejected
+  status      String   @default("pending")
+  /// author | agent | admin
+  reviewBy    String?
+  reviewedAt  DateTime?
+  reviewerId  String?
+  agentNote   String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  article  Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User?   @relation("AnnotationReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([articleId, status])
+  @@index([userId])
+}
+
+// =============================================================================
+// agent 域：AgentConversation / AgentMessage / HoverExplainCache /
+// AgentMemory / LearningProgress
+// =============================================================================
+
+/// Agent 对话会话（面板长期上下文）
+model AgentConversation {
+  id        String    @id @default(cuid())
+  userId    String?
+  /// 匿名会话 cookie / 浏览器指纹 hash（可选）
+  guestKey  String?
+  title     String    @default("")
+  summary   String    @default("")
+  /// 匿名会话过期时间；登录用户会话可为空（长期保留）
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user     User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AgentMessage[]
+
+  @@index([userId, updatedAt])
+  @@index([guestKey])
+  @@index([expiresAt])
+}
+
+model AgentMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  thinking       String   @default("")
+  createdAt      DateTime @default(now())
+
+  conversation AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+/// 悬停讲解服务端缓存（跨会话复用）
+model HoverExplainCache {
+  id        String   @id @default(cuid())
+  /// hash(normalized topic + style)
+  cacheKey  String   @unique
+  topic     String
+  answer    String
+  hits      Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+}
+
+/// 用户级 Agent 记忆（会/不会、偏好、摘要）
+model AgentMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  value     String
+  /// fact | skill | preference | summary
+  kind      String   @default("fact")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId, kind])
+}
+
+model LearningProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  /// 跨域引用 content.Article.id；无 FK，存在性经 ArticleQueryPort 校验
+  articleId String
+  progress  Float    @default(0)
+  /// not_started | learning | mastered
+  mastery   String   @default("learning")
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@index([articleId])
+}

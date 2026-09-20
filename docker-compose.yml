@@ -1,0 +1,69 @@
+# Local full stack (production-shape): PostgreSQL + API with health / readiness probes (R-03).
+#
+# The web app is recommended to be statically hosted (build output apps/web/dist) or
+# fronted by nginx; it is intentionally not coupled here.
+#
+# Usage:
+#   JWT_SECRET=... POSTGRES_PASSWORD=... CORS_ORIGIN=... STEPFUN_API_KEY=... \
+#     docker compose up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: grimoire-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: grimoire
+      # Password must be set explicitly (fail-fast if empty). Sample values are
+      # forbidden to avoid public weak-credential databases.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?must set POSTGRES_PASSWORD}
+      POSTGRES_DB: grimoire
+    ports:
+      # Loopback only. Production deployments should remove this mapping and
+      # keep the database reachable only on the container network.
+      # See docs/operations/deployment.md for the recommended topology.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - grimoire_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grimoire -d grimoire"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    container_name: grimoire-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 8181
+      # Bind to all interfaces inside the container. Production deployments
+      # should keep the host mapping on loopback and use a reverse proxy.
+      HOST: 0.0.0.0
+      # R-07: orchestration-layer failures to provide critical env must hard-fail
+      # at startup, doubling up with validateEnv() in services/api.
+      DATABASE_URL: postgresql://grimoire:${POSTGRES_PASSWORD:?must set POSTGRES_PASSWORD}@postgres:5432/grimoire?schema=public
+      JWT_SECRET: ${JWT_SECRET:?must set JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN:?must set CORS_ORIGIN}
+      STEPFUN_API_KEY: ${STEPFUN_API_KEY:-}
+      # Optional server-side provider (used by the P1-1 failover chain).
+      # OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports:
+      # Loopback only. Production deployments should remove this mapping and
+      # route public traffic through a reverse proxy with TLS.
+      # See docs/operations/deployment.md for the recommended topology.
+      - "127.0.0.1:8181:8181"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8181/ready || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+volumes:
+  grimoire_pg_data:
