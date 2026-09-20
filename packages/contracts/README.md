@@ -56,7 +56,7 @@ Runtime: **none.** Dev: `vitest`, `oxlint`, `typescript`.
   every `serialize.ts` and every front-end client file in the same
   commit.
 - Adding a port requires an implementation in the owning service and a
-  registration in `apps/api/src/compose.ts` in the same commit.
+  registration in `services/api/src/compose.ts` in the same commit.
 - Hover sanitization rules are intentionally **strict**; tests in
   `hoverSanitize.test.ts` pin the rejection patterns. Loosening a rule
   requires a paired ADR entry.

@@ -70,7 +70,7 @@ npm workspaces（`apps/*` + `packages/*`）边界正确，workspace 互引通过
 
 #### 🟡 D-04：`tests/` 目录角色模糊
 
-根目录 `tests/integration/` 与 `tests/unit/` 存在，但实际测试分散在 `apps/api/src/**/*.test.ts`（10 个文件）与 `packages/shared/src/smoke.test.ts`。CI 只跑 `npm test --workspace=@agentforge/api` 与 shared。需核验 `tests/` 是否在用——若为空壳，同 D-01 处理。
+根目录 `tests/integration/` 与 `tests/unit/` 存在，但实际测试分散在 `services/api/src/**/*.test.ts`（10 个文件）与 `packages/shared/src/smoke.test.ts`。CI 只跑 `npm test --workspace=@agentforge/api` 与 shared。需核验 `tests/` 是否在用——若为空壳，同 D-01 处理。
 
 ---
 
@@ -88,7 +88,7 @@ npm workspaces（`apps/*` + `packages/*`）边界正确，workspace 互引通过
 
 ### 2.2 中间件链
 
-`apps/api/src/app.ts` `createApp()` 挂载顺序：
+`services/api/src/app.ts` `createApp()` 挂载顺序：
 
 ```
 trust proxy（显式开关）→ helmet → cors（白名单+credentials）→ express.json(1mb)
@@ -396,14 +396,14 @@ Pino 结构化日志，生产 JSON、开发 pretty。请求 ID 贯穿 errorHandl
 | D-01 | 根 `api/` 空死目录 | `api/` |
 | D-03 | `services/` 纯文档占位易误读 | `services/` |
 | D-04 | `tests/` 目录角色需核验 | `tests/` |
-| D-05 | `agent.ts` 722 行，SSE 双路由逻辑重复 | `apps/api/src/routes/agent.ts` |
+| D-05 | `agent.ts` 722 行，SSE 双路由逻辑重复 | `services/api/src/routes/agent.ts` |
 | D-06 | 无 enum，角色/状态用字符串（可接受取舍） | `schema.prisma` |
 | D-13 | 内联样式偏多 | `AppShell` / `AgentFloat` |
 | D-16 | tool-loop 无独立限流 | `toolLoop.ts` |
 | D-17 | BYOK 密钥轮换无自动机制（已知限制） | `byokCrypto.ts` |
 | D-18 | SSRF 无 DNS 二次校验 | `byokUrlPolicy.ts` |
 | D-22 | `PLAN.md` 自承过时仍保留 | `PLAN.md` |
-| D-23 | 路由集成测试薄弱 | `apps/api/src/routes/` |
+| D-23 | 路由集成测试薄弱 | `services/api/src/routes/` |
 
 ### 🔵 观察（架构取舍说明，非缺陷）
 

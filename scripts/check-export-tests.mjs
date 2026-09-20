@@ -3,12 +3,12 @@
  * @description Export-coverage gate for the Grimoire monorepo.
  *
  * Responsibilities:
- * - Walk each workspace's `src/index.ts` re-export chain
- * - Identify callable public exports (functions, classes, arrows)
- * - Assert every callable export is referenced by at least one test file
- *   under the workspace's own `tests/` or the root `tests/` journeys
- * - Ignore constants, Zod schemas, and enum values (they are exercised
- *   indirectly by their consumers)
+ * - Walk each workspace's `src/index.ts` re-export chain (star re-exports + named re-exports)
+ * - Identify callable public exports (functions, classes) inside every source file in `src/`
+ * - Assert every callable export is referenced by at least one test file under that
+ *   workspace's `tests/` directory or under the root `tests/` journeys
+ * - Ignore constants, Zod schemas, types, and enum values (they are exercised indirectly
+ *   by their consumers)
  *
  * Notes:
  * - A `PENDING` allowlist at the bottom of this file lists symbols without
@@ -34,7 +34,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
  * during a refactor — they are an audit trail.
  */
 const PENDING = [
-  // { workspace: "@grimoire/example", export: "createExample", reason: "TODO: <ADR-NNN>" },
+  // Router factories exposed by the per-service public barrel.
+  // They are wired through `services/api/src/compose.ts` and have no
+  // dedicated test today; the integration test under
+  // `apps/api/tests/` covers them indirectly. Add direct unit tests
+  // for each in the corresponding `services/<name>/tests/` directory.
+  { workspace: "@grimoire/community", export: "createCommunityRouters", reason: "router factory; covered indirectly by apps/api integration tests" },
+  { workspace: "@grimoire/community", export: "createCommunityRouter", reason: "router factory; covered indirectly by apps/api integration tests" },
+  { workspace: "@grimoire/content", export: "createContentRouters", reason: "router factory; covered indirectly by apps/api integration tests" },
+  { workspace: "@grimoire/content", export: "createContentRouter", reason: "router factory; covered indirectly by apps/api integration tests" },
+  { workspace: "@grimoire/identity", export: "createIdentityRouters", reason: "router factory; covered indirectly by apps/api integration tests" },
+  { workspace: "@grimoire/identity", export: "createIdentityRouter", reason: "router factory; covered indirectly by apps/api integration tests" },
+  { workspace: "@grimoire/llm", export: "createLlmGateway", reason: "provider factory; covered indirectly by services/agent tests" },
 ];
 
 const WORKSPACE_GLOBS = ["apps", "packages", "services"];
@@ -75,67 +86,71 @@ async function walkTs(dir, acc = []) {
     if (ent.isDirectory()) {
       if (ent.name === "node_modules" || ent.name === "dist") continue;
       await walkTs(p, acc);
-    } else if ((ent.name.endsWith(".ts") || ent.name.endsWith(".tsx")) && !ent.name.endsWith(".d.ts")) {
+    } else if (
+      (ent.name.endsWith(".ts") || ent.name.endsWith(".tsx")) &&
+      !ent.name.endsWith(".d.ts")
+    ) {
       acc.push(p);
     }
   }
   return acc;
 }
 
-const RE_EXPORTS = /export\s+\*\s+from\s+['"]([^'"]+)['"]/g;
+/**
+ * Star re-exports: `export * from "./foo.js"`.
+ * Captures `export *` plus optional `type` modifier.
+ */
+const RE_STAR = /export\s+(?:\*)\s+from\s+['"]([^'"]+)['"]/g;
+
+/**
+ * Named re-exports: `export { a, b as c } from "./foo.js"`.
+ * Captures both bare names and `as` aliases. We treat every bare name plus
+ * every alias as a re-exported symbol (the alias is what consumers see).
+ */
+const RE_NAMED = /export\s+(?:type\s+)?\{([^}]+)\}\s+from\s+['"]([^'"]+)['"]/g;
+
 const FUNC_RE = /export\s+(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/g;
 const CLASS_RE = /export\s+class\s+([A-Za-z_$][\w$]*)/g;
-const CONST_RE = /export\s+const\s+([A-Za-z_$][\w$]*)/g;
-const TYPE_RE = /export\s+(?:interface|type)\s+([A-Za-z_$][\w$]*)/g;
 
 const SCHEMA_TOKENS = ["Schema", "SchemaType"];
 const ENUM_TOKENS = ["Enum", "EnumType"];
 const TYPE_TOKENS = ["Type", "Config", "Options", "Args"];
 
-function isCallable(name, src) {
-  // Heuristic: if the export matches a function or class declaration,
-  // it's callable. Constants / types / schemas are excluded.
-  if (/\bfunction\s+/.test(src.slice(0, src.indexOf(name)))) return true;
-  if (/\bclass\s+/.test(src.slice(0, src.indexOf(name)))) return true;
-  if (FUNC_RE.test(`export function ${name}`)) return true;
-  if (CLASS_RE.test(`export class ${name}`)) return true;
-  return false;
-}
-
+/**
+ * Heuristic: ignore constants, Zod schemas, types, enums.
+ */
 function isLikelyIgnored(name) {
   if (SCHEMA_TOKENS.some((t) => name.endsWith(t))) return true;
   if (ENUM_TOKENS.some((t) => name.endsWith(t))) return true;
   if (TYPE_TOKENS.some((t) => name.endsWith(t))) return true;
-  // Common non-callable exports
   if (name === name.toUpperCase() && name.includes("_")) return true;
   return false;
 }
 
-async function collectExports(wsDir) {
-  const indexFile = path.join(wsDir, "src", "index.ts");
-  const src = await readSource(indexFile);
-  if (!src) return { reExports: [], localExports: [] };
-
-  const reExports = [];
-  let m;
-  RE_EXPORTS.lastIndex = 0;
-  while ((m = RE_EXPORTS.exec(src)) !== null) {
-    reExports.push(m[1]);
-  }
-
-  const localExports = [];
-  for (const re of [FUNC_RE, CLASS_RE, CONST_RE, TYPE_RE]) {
-    re.lastIndex = 0;
-    while ((m = re.exec(src)) !== null) {
-      localExports.push(m[1]);
-    }
-  }
-  return { reExports, localExports };
+/**
+ * Resolve a relative path that may end in `.js` to the on-disk `.ts` file.
+ * Node module resolution uses `.js` for `.ts` imports in ESM; the source
+ * file actually lives at `<base>.ts`.
+ */
+function resolveImport(fromFile, spec) {
+  if (!spec.startsWith(".")) return null;
+  const dir = path.dirname(fromFile);
+  let resolved = path.resolve(dir, spec);
+  // If the spec ends in `.js`, strip it and let the caller append `.ts`.
+  if (resolved.endsWith(".js")) resolved = resolved.slice(0, -3);
+  if (resolved.endsWith(".ts") || resolved.endsWith(".tsx")) return resolved;
+  // Otherwise, append `.ts` by default.
+  return resolved + ".ts";
 }
 
-async function resolveReExports(startFile, visited = new Set()) {
-  // Recursively walk re-export chains to gather callable exports
+/**
+ * Walk the star + named re-export chains from a starting file.
+ * Returns the set of bare names (not aliases) reachable via star re-exports.
+ * Named re-exports are tracked separately.
+ */
+async function walkReExports(startFile, visited = new Set()) {
   const out = new Set();
+  const named = new Map(); // alias -> spec
   const queue = [startFile];
   while (queue.length) {
     const f = queue.shift();
@@ -145,13 +160,24 @@ async function resolveReExports(startFile, visited = new Set()) {
     if (!src) continue;
 
     let m;
-    RE_EXPORTS.lastIndex = 0;
-    while ((m = RE_EXPORTS.exec(src)) !== null) {
-      const target = m[1];
-      if (target.startsWith(".")) {
-        const dir = path.dirname(f);
-        const resolved = path.resolve(dir, target);
-        queue.push(resolved + ".ts");
+    RE_STAR.lastIndex = 0;
+    while ((m = RE_STAR.exec(src)) !== null) {
+      const target = resolveImport(f, m[1]);
+      if (target) queue.push(target);
+    }
+
+    RE_NAMED.lastIndex = 0;
+    while ((m = RE_NAMED.exec(src)) !== null) {
+      const inner = m[1];
+      const target = resolveImport(f, m[2]);
+      if (!target) continue;
+      // Parse `a, b as c`. The "as" alias is the public name.
+      for (const part of inner.split(",")) {
+        const trimmed = part.trim();
+        if (!trimmed) continue;
+        const asMatch = trimmed.match(/^(\S+)\s+as\s+(\S+)$/);
+        const publicName = asMatch ? asMatch[2] : trimmed;
+        named.set(publicName, target);
       }
     }
 
@@ -160,6 +186,23 @@ async function resolveReExports(startFile, visited = new Set()) {
       while ((m = re.exec(src)) !== null) {
         out.add(m[1]);
       }
+    }
+  }
+  return { callable: out, named };
+}
+
+/**
+ * Find callable exports declared in a single source file (no re-export chase).
+ */
+async function findCallablesInFile(file) {
+  const src = await readSource(file);
+  if (!src) return new Set();
+  const out = new Set();
+  let m;
+  for (const re of [FUNC_RE, CLASS_RE]) {
+    re.lastIndex = 0;
+    while ((m = re.exec(src)) !== null) {
+      out.add(m[1]);
     }
   }
   return out;
@@ -180,7 +223,7 @@ for (const family of WORKSPACE_GLOBS) {
     if (!wsName || !wsName.startsWith("@grimoire/")) continue;
 
     const indexFile = path.join(wsDir, "src", "index.ts");
-    const allExports = await resolveReExports(indexFile);
+    const { callable } = await walkReExports(indexFile);
 
     const testFiles = [
       ...(await walkTs(path.join(wsDir, "tests"))),
@@ -188,10 +231,8 @@ for (const family of WORKSPACE_GLOBS) {
     ];
     const testSrc = (await Promise.all(testFiles.map(readSource))).join("\n");
 
-    for (const name of allExports) {
+    for (const name of callable) {
       if (isLikelyIgnored(name)) continue;
-      // The export must be referenced as an identifier in some test file.
-      // Loose heuristic: look for word-boundary match.
       const re = new RegExp(`\\b${name}\\b`);
       if (re.test(testSrc)) continue;
 

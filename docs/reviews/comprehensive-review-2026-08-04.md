@@ -85,7 +85,7 @@ Prisma 6 -> SQLite 默认 / PostgreSQL 可选
 ### 2.1 边界评价
 
 - **已核验优点**：前后端通过 REST/SSE 解耦；`packages/shared` 复用权限与净化规则，减少双端漂移；LLM 适配器独立于路由。
-- **主要耦合**：`apps/api/src/routes/agent.ts` 同时承担路由、SSE 生命周期与流控；`apps/web/src/components/agent/AgentFloat.tsx` 同时承担悬停 UI、面板 UI、计时器、节流与缓存交互。
+- **主要耦合**：`services/api/src/routes/agent.ts` 同时承担路由、SSE 生命周期与流控；`apps/web/src/components/agent/AgentFloat.tsx` 同时承担悬停 UI、面板 UI、计时器、节流与缓存交互。
 - **合理取舍**：当前 CRUD 路由使用 fat-handler，没有立即引入 controller/repository 的必要；在功能继续增长前，优先抽“稳定重复的策略/流程”，而不是全面重构。
 
 ---
@@ -98,7 +98,7 @@ Prisma 6 -> SQLite 默认 / PostgreSQL 可选
 
 - `apps/web/src/lib/apiToken.ts:3-22` 使用 `localStorage` 保存与读取 token。
 - `apps/web/src/hooks/useAuth.tsx` 依赖该存储完成会话恢复。
-- 服务端 access 约 15 分钟、refresh 约 7 天；刷新令牌入库 hash 并旋转吊销，见 `apps/api/src/lib/jwt.ts`、`apps/api/src/routes/auth.ts`。
+- 服务端 access 约 15 分钟、refresh 约 7 天；刷新令牌入库 hash 并旋转吊销，见 `services/api/src/lib/jwt.ts`、`services/api/src/routes/auth.ts`。
 - 仓库已有 `docs/roadmap/httponly-cookie-migration.md`，说明这是已识别但尚未落地的设计项。
 
 **影响与判断**
@@ -113,7 +113,7 @@ Prisma 6 -> SQLite 默认 / PostgreSQL 可选
 
 **证据（已核验）**
 
-`apps/api/src/lib/llm/tools/toolLoop.ts` 将工具执行结果直接拼成 user message，再送回 LLM。工具可读取已发布文章，而文章正文由半信任内容生产者写入。现有白名单、Zod、8 秒工具超时、最多 5 轮与审计日志不能替代提示词信任边界。
+`services/api/src/lib/llm/tools/toolLoop.ts` 将工具执行结果直接拼成 user message，再送回 LLM。工具可读取已发布文章，而文章正文由半信任内容生产者写入。现有白名单、Zod、8 秒工具超时、最多 5 轮与审计日志不能替代提示词信任边界。
 
 **影响与判断**
 
@@ -127,7 +127,7 @@ Observation 使用明确结构化标记与长度上限；将外部文章内容�
 
 **证据（已核验）**
 
-`apps/api/src/lib/byokUrlPolicy.ts` 检查私网、环回、metadata、特殊主机名等，但未见调用前 DNS 解析并锁定结果；Provider adapter 最终使用 `fetch` 访问用户提供的 base URL。
+`services/api/src/lib/byokUrlPolicy.ts` 检查私网、环回、metadata、特殊主机名等，但未见调用前 DNS 解析并锁定结果；Provider adapter 最终使用 `fetch` 访问用户提供的 base URL。
 
 **影响与判断**
 
@@ -141,7 +141,7 @@ Observation 使用明确结构化标记与长度上限；将外部文章内容�
 
 **证据（已核验）**
 
-`apps/api/src/middleware/errorHandler.ts` 以 `process.env.NODE_ENV === 'production'` 决定是否把错误消息替换为通用文案。若生产运行环境遗漏变量，默认分支可能回显底层错误消息。
+`services/api/src/middleware/errorHandler.ts` 以 `process.env.NODE_ENV === 'production'` 决定是否把错误消息替换为通用文案。若生产运行环境遗漏变量，默认分支可能回显底层错误消息。
 
 **影响与判断**
 
@@ -170,7 +170,7 @@ Prisma/网络错误可能暴露字段、路径或 Provider 细节。这里是配
 
 **证据（已核验）**
 
-`apps/api/src/routes/applications.ts` 在批准申请时更新用户角色/等级与申请状态，但审查到的写入未持久化审批人、来源 IP/UA 或独立审计事件；现有 Pino 业务日志不足以替代可查询审计记录。
+`services/api/src/routes/applications.ts` 在批准申请时更新用户角色/等级与申请状态，但审查到的写入未持久化审批人、来源 IP/UA 或独立审计事件；现有 Pino 业务日志不足以替代可查询审计记录。
 
 **影响与判断**
 
@@ -184,7 +184,7 @@ Prisma/网络错误可能暴露字段、路径或 Provider 细节。这里是配
 
 **证据**
 
-`apps/api/src/app.ts` 请求日志与 `errorHandler.ts` 使用 `req.originalUrl`。若未来接口把 token、临时签名或敏感参数放入 query，日志聚合系统会保存原值。
+`services/api/src/app.ts` 请求日志与 `errorHandler.ts` 使用 `req.originalUrl`。若未来接口把 token、临时签名或敏感参数放入 query，日志聚合系统会保存原值。
 
 **建议**
 
@@ -194,7 +194,7 @@ Prisma/网络错误可能暴露字段、路径或 Provider 细节。这里是配
 
 **证据**
 
-`apps/api/src/lib/jwt.ts` 调用 `jwt.verify(token, secret())`，审查未看到显式 `{ algorithms: ['HS256'] }` 约束。
+`services/api/src/lib/jwt.ts` 调用 `jwt.verify(token, secret())`，审查未看到显式 `{ algorithms: ['HS256'] }` 约束。
 
 **影响与判断**
 
@@ -249,7 +249,7 @@ jsonwebtoken 版本与 secret 校验提供一定默认保护，但显式算法�
 
 ### ARC-01 — High：Agent API 路由承担过多职责
 
-`apps/api/src/routes/agent.ts` 约 722 行，同时包含请求 schema、SSE 初始化/帧协议、abort 生命周期、thinking 门控、缓存与持久化收尾。`agentOrchestrator.ts` 已抽出部分上下文编排，但两个流式端点仍有重复。
+`services/api/src/routes/agent.ts` 约 722 行，同时包含请求 schema、SSE 初始化/帧协议、abort 生命周期、thinking 门控、缓存与持久化收尾。`agentOrchestrator.ts` 已抽出部分上下文编排，但两个流式端点仍有重复。
 
 **建议**：抽出稳定的 SSE session/stream runner，统一 delta、thinking、abort、finalize 生命周期；路由只组装输入、授权与调用。
 
@@ -346,7 +346,7 @@ Pino、requestId、LLM/cache/tool 事件已存在，但未发现 Prometheus/Open
 
 ### Q-05 — Medium：无 graceful shutdown
 
-`apps/api/src/index.ts` 启动监听后未看到 SIGTERM/SIGINT 处理。容器/进程重启时 Prisma 连接、正在发送的 SSE 与正在进行的 Provider 请求缺少统一 drain 策略。
+`services/api/src/index.ts` 启动监听后未看到 SIGTERM/SIGINT 处理。容器/进程重启时 Prisma 连接、正在发送的 SSE 与正在进行的 Provider 请求缺少统一 drain 策略。
 
 **建议**：停止接收新请求、等待有限时间、abort 活跃流、断开 Prisma，超时后退出。
 
@@ -376,7 +376,7 @@ seed CLI 仍有多处 `console.*`；前端 AgentFloat/AppShell 有大量内联 t
 
 ### DOC-01 — High：README CORS 端口描述漂移
 
-`README.md:39` 仍描述默认端口为 5173；`apps/api/src/app.ts` 实际默认 CORS origin 为 `http://localhost:5280`。应以代码与 Vite 配置为准更新说明。
+`README.md:39` 仍描述默认端口为 5173；`services/api/src/app.ts` 实际默认 CORS origin 为 `http://localhost:5280`。应以代码与 Vite 配置为准更新说明。
 
 ### DOC-02 — High：`.env.example` 的 VITE API URL 与代理约定不一致
 
@@ -384,7 +384,7 @@ seed CLI 仍有多处 `console.*`；前端 AgentFloat/AppShell 有大量内联 t
 
 ### DOC-03 — High：架构文档对 `_legacy` 与 Annotation API 的描述过时
 
-`docs/architecture/overview.md` 声称 `_legacy` 已被忽略、Annotation 尚无 API 路由；当前 git 与 `apps/api/src/routes/annotations.ts` 均显示相反事实。
+`docs/architecture/overview.md` 声称 `_legacy` 已被忽略、Annotation 尚无 API 路由；当前 git 与 `services/api/src/routes/annotations.ts` 均显示相反事实。
 
 ### DOC-04 — Medium：部署交付链不完整
 
@@ -446,7 +446,7 @@ CI 已覆盖 build/test，但无 lint、audit、coverage、concurrency 或 E2E�
 
 ### lint warning 摘要
 
-- `apps/api/src/lib/llm/tools/toolLoop.ts`：`hitMaxIters` 未使用。
+- `services/api/src/lib/llm/tools/toolLoop.ts`：`hitMaxIters` 未使用。
 - `apps/web/src/lib/markdown.ts`、`components/agent/hoverTarget.ts`：无用转义。
 - `apps/web/src/hooks/useAuth.tsx`、`useTheme.tsx`：Fast Refresh 导出规则 warning。
 - `apps/web/src/components/agent/AgentFloat.tsx`：复杂表达式依赖数组及 `hoverTip` 依赖 warning。

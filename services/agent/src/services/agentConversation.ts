@@ -12,7 +12,7 @@
  * Factory injects `PrismaClient`; only agent-owned tables (`AgentConversation`, `AgentMessage`) are touched.
  */
 import { randomBytes } from 'node:crypto';
-import { logger } from '@core/foundation';
+import { logger } from '@grimoire/foundation';
 
 const GUEST_CONV_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 

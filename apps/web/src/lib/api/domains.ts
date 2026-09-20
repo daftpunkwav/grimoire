@@ -1,4 +1,4 @@
-import type { ArticleSummary, DomainSummary } from '@core/contracts';
+import type { ArticleSummary, DomainSummary } from '@grimoire/contracts';
 import { request } from './client.js';
 
 export const domainsApi = {

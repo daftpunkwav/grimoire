@@ -2,7 +2,7 @@
 
 > Language: **English** | [简体中文](composition-root.zh.md)
 
-`apps/api/src/compose.ts` is the **only** file in the repository that
+`services/api/src/compose.ts` is the **only** file in the repository that
 imports another service's source. It is also the only file that
 constructs port implementations and wires them into the HTTP host.
 
@@ -61,7 +61,7 @@ The composition result is a `RuntimeComponents` bundle that
    [`packages/contracts/src/ports.ts`](../../packages/contracts/src/ports.ts).
 2. Implement it in the owning service (e.g. `services/<name>/src/<thing>.ts`).
 3. Register the implementation in
-   [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) inside the
+   [`services/api/src/compose.ts`](../../services/api/src/compose.ts) inside the
    matching `compose()` step.
 4. Add at least one test that exercises the route that consumes the
    port. The CI gate `pnpm check:exports` enforces export coverage;

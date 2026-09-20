@@ -23,7 +23,7 @@ in [`@grimoire/contracts`](../packages/contracts/).
   `@grimoire/foundation`. No cross-service source imports are allowed;
   the gate `scripts/check-boundaries.mjs` enforces this.
 - Every port implementation a service exposes is registered in
-  `apps/api/src/compose.ts`. The composition root is the only place that
+  `services/api/src/compose.ts`. The composition root is the only place that
   imports service internals.
 - Each service ships its own `routes/`, `services/`, `lib/`, and `tests/`.
   Routes are Express 5 handlers; services are the application-layer use

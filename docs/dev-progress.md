@@ -16,7 +16,7 @@
 | 共享类型 / 权限 / 悬停净化 | `packages/shared` | `permissions.ts` + `hoverSanitize.ts` |
 | SQLite + Prisma | `apps/api/prisma/schema.prisma` | 15 个模型（含 `RefreshToken`、`Annotation`） |
 | 健康检查 | `GET /health` | `{ ok, service, ts }` |
-| 结构化日志 | `apps/api/src/lib/logger.ts` | Pino |
+| 结构化日志 | `services/api/src/lib/logger.ts` | Pino |
 
 ### 1.2 后端（apps/api）
 
@@ -51,7 +51,7 @@ LLM：`providers.ts`（`anthropic_messages` / `openai_chat` / `openai_responses`
 
 - `POST /explain` · `/explain/stream`（`hover | click`）
 - Prompt：`buildHoverSystem`（2–3 句、≤220 字）
-- 净化：`@core/contracts`（`extractHoverAnswer` 等）
+- 净化：`@grimoire/contracts`（`extractHoverAnswer` 等）
 - L2：`HoverExplainCache`，键前缀 **`v7`**，TTL 2h / 热 24h（hits≥8）
 - L1：前端 `hoverExplainCache.ts`
 - `POST /cache/clear`：**admin**

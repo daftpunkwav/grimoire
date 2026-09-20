@@ -49,7 +49,7 @@ services/<domain>/
    [`packages/contracts/src/ports.ts`](../../packages/contracts/src/ports.ts)。
 2. **实现该 port** 在 `src/index.ts`(或专用模块,并从中 re-export)。
 3. **注册该实现** 于
-   [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) 对应的
+   [`services/api/src/compose.ts`](../../services/api/src/compose.ts) 对应的
    `compose()` 步骤。
 4. **为每条路由与每个 port 方法至少加一个测试**。CI 门禁
    `pnpm check:exports` 强制导出覆盖;`pnpm boundaries` 强制路由只消费
@@ -111,8 +111,8 @@ export function compose(...): RuntimeComponents {
 
 - [ ] `packages/contracts` 声明新 port(或扩展既有 port)。
 - [ ] `services/<domain>/` 提供实现 + 测试 + READMEs。
-- [ ] `apps/api/src/compose.ts` 注册实现。
-- [ ] `apps/api/src/app.ts` 挂载路由。
+- [ ] `services/api/src/compose.ts` 注册实现。
+- [ ] `services/api/src/app.ts` 挂载路由。
 - [ ] 本地 `pnpm verify` 全绿。
 - [ ] 本地 `pnpm boundaries` 全绿。
 - [ ] 本地 `pnpm check:exports` 全绿。

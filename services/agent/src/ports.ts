@@ -4,12 +4,12 @@
  *
  * Responsibilities:
  * - Define *what the agent needs*, not *where it comes from*.
- * - Re-export port types from `@core/contracts` (single source of truth, no duplicate shapes across services).
+ * - Re-export port types from `@grimoire/contracts` (single source of truth, no duplicate shapes across services).
  * - Aggregate the assembly-time dependency bag (`AgentDeps`) the host composition root must satisfy.
  *
  * Implementations are injected by the composition root (in-process delegates today, HTTP clients in a future microservice split).
  */
-import type { ArticleQueryPort, LlmGatewayPort, UserQueryPort } from '@core/contracts';
+import type { ArticleQueryPort, LlmGatewayPort, UserQueryPort } from '@grimoire/contracts';
 
 export type { ArticleQueryPort, LlmGatewayPort, UserQueryPort };
 

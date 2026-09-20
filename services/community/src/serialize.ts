@@ -10,8 +10,8 @@
  * contract must be caught here, not silently dropped downstream.
  */
 import type { Topic } from '@prisma/client';
-import type { TopicSummary } from '@core/contracts';
-import type { UserSummary } from '@core/contracts';
+import type { TopicSummary } from '@grimoire/contracts';
+import type { UserSummary } from '@grimoire/contracts';
 
 /** Topic serializer (independent of Prisma joins; bound to the `TopicSummary` contract to prevent silent drift). */
 export function toTopicSummary(
@@ -47,7 +47,7 @@ export function toTopicSummary(
 /** Batched author + linked-article attach (cross-service boundary: no `join user/article`, go through the injected ports). */
 export async function attachTopicRefs(
   rows: Topic[],
-  deps: { users: Pick<import('@core/contracts').UserSummaryPort, 'getUserSummaries'>; articles: Pick<import('@core/contracts').ArticleQueryPort, 'getArticlesByIds'> },
+  deps: { users: Pick<import('@grimoire/contracts').UserSummaryPort, 'getUserSummaries'>; articles: Pick<import('@grimoire/contracts').ArticleQueryPort, 'getArticlesByIds'> },
 ): Promise<TopicSummary[]> {
   const [authors, articles] = await Promise.all([
     deps.users.getUserSummaries(rows.map((r) => r.authorId)),

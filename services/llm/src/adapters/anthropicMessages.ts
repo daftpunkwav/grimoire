@@ -12,7 +12,7 @@
  * This service is the only workspace that holds provider credentials.
  */
 import type { LlmRequest, LlmResponse, ProviderConfig, StreamChunk } from '../types.js';
-import { extractVisibleAnswer } from '@core/foundation';
+import { extractVisibleAnswer } from '@grimoire/foundation';
 import { LLM_TOKEN_LIMITS } from '../config.js';
 import { LlmCallError, stripSlash, tokenDefaults } from '../providerHttp.js';
 import { providerApiKey } from '../providerSecret.js';

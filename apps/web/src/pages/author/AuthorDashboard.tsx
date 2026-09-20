@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '@/lib/api';
-import type { ArticleSummary, AnimationDef } from '@core/contracts';
+import type { ArticleSummary, AnimationDef } from '@grimoire/contracts';
 import { Tag } from '@/components/ui/Tag';
 import { useAuth } from '@/hooks/useAuth';
-import { ANIMATION_TEMPLATES } from '@core/contracts';
+import { ANIMATION_TEMPLATES } from '@grimoire/contracts';
 
 export function AuthorDashboard() {
   const { isAuthor, isAdmin, loading: authLoading } = useAuth();

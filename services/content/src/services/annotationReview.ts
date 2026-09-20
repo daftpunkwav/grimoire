@@ -11,7 +11,7 @@
  * alternative lock.
  */
 import type { PrismaClient } from '@prisma/client';
-import { badRequest, notFound } from '@core/foundation';
+import { badRequest, notFound } from '@grimoire/foundation';
 
 export async function applyAnnotationDecision(
   prisma: PrismaClient,

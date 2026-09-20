@@ -54,7 +54,7 @@ A new service must:
 2. **Implement that port** in `src/index.ts` (or a dedicated module
    re-exported from there).
 3. **Register the implementation** in
-   [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) inside the
+   [`services/api/src/compose.ts`](../../services/api/src/compose.ts) inside the
    matching `compose()` step.
 4. **Add at least one test** for every route and every port method.
    The CI gate `pnpm check:exports` enforces export coverage; the
@@ -119,8 +119,8 @@ Add a mount in `app.ts` (or whichever file calls
 - [ ] `packages/contracts` declares the new port (or extends an
       existing one).
 - [ ] `services/<domain>/` ships the implementation + tests + READMEs.
-- [ ] `apps/api/src/compose.ts` registers the implementation.
-- [ ] `apps/api/src/app.ts` mounts the route.
+- [ ] `services/api/src/compose.ts` registers the implementation.
+- [ ] `services/api/src/app.ts` mounts the route.
 - [ ] `pnpm verify` is green locally.
 - [ ] `pnpm boundaries` is green locally.
 - [ ] `pnpm check:exports` is green locally.

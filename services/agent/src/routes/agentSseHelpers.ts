@@ -10,9 +10,9 @@
  * No request handling or stream consumption — only payload shaping.
  */
 import type { Response } from 'express';
-import type { SseSession } from '@core/foundation';
-import { sseWrite } from '@core/foundation';
-import type { LlmGatewayPort } from '@core/contracts';
+import type { SseSession } from '@grimoire/foundation';
+import { sseWrite } from '@grimoire/foundation';
+import type { LlmGatewayPort } from '@grimoire/contracts';
 import { AGENT_MODE_META } from '../lib/agentPrompt.js';
 
 /** Hover cache hit JSON response body. */

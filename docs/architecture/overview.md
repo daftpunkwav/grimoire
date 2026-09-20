@@ -4,11 +4,11 @@
 
 ## 概览
 
-模块化单体（npm workspaces：`apps/*`、`packages/*`、`services/*`）。域间**禁止 import 实现**，只经 `@core/contracts` 的端口与 DTO 通信；唯一组合根是 `services/api`。
+模块化单体（npm workspaces：`apps/*`、`packages/*`、`services/*`）。域间**禁止 import 实现**，只经 `@grimoire/contracts` 的端口与 DTO 通信；唯一组合根是 `services/api`。
 
 | 路径 | 职责 | 状态 |
 |------|------|------|
-| `apps/web` | Vite 8 + React 19 + TypeScript 读者/作者端（仅依赖 `@core/contracts`） | 已实现 |
+| `apps/web` | Vite 8 + React 19 + TypeScript 读者/作者端（仅依赖 `@grimoire/contracts`） | 已实现 |
 | `apps/desktop` / `apps/mobile` | 客户端占位 | 占位 |
 | `packages/contracts` | 契约：DTO、权限矩阵、端口、悬停净化 | 已实现 |
 | `packages/foundation` | 机制：JWT、错误、SSE、BYOK 加解密、限流中间件 | 已实现 |
@@ -26,8 +26,8 @@ CI：`node scripts/check-domain-boundaries.mjs` 扫描跨服务 import 与他域
 ## 依赖矩阵（允许方向）
 
 ```
-apps/web            → @core/contracts
-packages/foundation → @core/contracts
+apps/web            → @grimoire/contracts
+packages/foundation → @grimoire/contracts
 services/*          → contracts + foundation + 本域表
 services/api        → 全部（组合根，唯一允许）
 ```
@@ -50,7 +50,7 @@ Refresh/access 目前仍存前端 localStorage；HttpOnly Cookie 迁移见 **`do
 | | 悬停 Agent | Agent 面板 |
 |--|------------|------------|
 | **定位** | 速度优先的即时讲解 | 可对话的助手（**目标为完整智能体**） |
-| **当前架构** | 单轮 Fast Direct；流式正文；L2 `HoverExplainCache`（键前缀 `v7`）+ 前端 L1；记忆只读注入；净化在 `@core/contracts` | 会话/消息持久化；滚动摘要；记忆注入；流式 thinking + 正文；**P0 tool-loop**（`search_articles` / `get_article`，勾选「允许工具」） |
+| **当前架构** | 单轮 Fast Direct；流式正文；L2 `HoverExplainCache`（键前缀 `v7`）+ 前端 L1；记忆只读注入；净化在 `@grimoire/contracts` | 会话/消息持久化；滚动摘要；记忆注入；流式 thinking + 正文；**P0 tool-loop**（`search_articles` / `get_article`，勾选「允许工具」） |
 | **目标架构** | 保持轻量；扩缓存键、跨设备同步 | 更多工具 / MCP；完整模式 UI；读写记忆确认 |
 | **未实现** | 独立悬停会话表、跨设备同步 | P1/P2 见 **`docs/roadmap/tool-loop-roadmap.md`** |
 
@@ -109,7 +109,7 @@ Vite：端口 **8180**、`host: 127.0.0.1`、`/api` 代理到 `8181`。
 - community：`routes/topics`（文章经 `ArticleQueryPort`）
 - agent：`routes/agent` + `services/agentOrchestrator` / `agentConversation` / `agentMemory` / `hoverCache` / `learningProgress`
 - llm：`providers.ts` + `adapters/`（三种 API 格式；BYOK 密文在 `byokToProvider` 内解密）
-- 机制：`@core/foundation`（JWT、errorHandler、SSE、BYOK 加解密）
+- 机制：`@grimoire/foundation`（JWT、errorHandler、SSE、BYOK 加解密）
 - 中间件：`optionalAuth` / `requireAuth` / `requireRole` / `requirePermission`；Zod `validate`
 
 ## 安全要点

@@ -15,7 +15,7 @@ chain non-zero.
 | `pnpm -r typecheck` | (per workspace `tsc --noEmit`) | The same, no emit. | Same. |
 | `pnpm typecheck:tests` | `tsc -p tsconfig.tests.json --noEmit` | Tests typecheck against the repo base. | A test references a path the runner can't resolve. |
 | `pnpm test:coverage` | `vitest run --coverage` | Unit tests pass and coverage thresholds are met. | Restore the test, not lower the threshold (see `vitest.config.ts`). |
-| `pnpm boundaries` | `scripts/check-boundaries.mjs` | Import direction: no cross-service source imports; only `apps/api/src/compose.ts` may import every service. | Move the offending import behind a port, or move it to the composition root. |
+| `pnpm boundaries` | `scripts/check-boundaries.mjs` | Import direction: no cross-service source imports; only `services/api/src/compose.ts` may import every service. | Move the offending import behind a port, or move it to the composition root. |
 | `pnpm check:deps` | `scripts/check-package-deps.mjs` | Declared vs imported deps; no value/dynamic cycles; runtime dep used only in tests → demote. | Update `package.json` to match the imports. |
 | `pnpm check:exports` | `scripts/check-export-tests.mjs` | Every callable public export is referenced by a test (constants / schemas / enums ignored). | Add a test for the export, or add it to the `PENDING` allowlist (the list only ever shrinks). |
 | `pnpm --filter @grimoire/web check:i18n` | `apps/web/scripts/check-i18n.mjs` | Catalog key parity between `en` and `zh-CN`; CJK sweep over `src/app`, `src/components`, `src/i18n` (with allowlist). | Add the missing translation, or remove the inline string. |
@@ -35,7 +35,7 @@ Allowed exceptions are listed in the script's header.
 
 **Fix**: introduce a port in `@grimoire/contracts`, implement it in the
 owning service, register it in
-[`apps/api/src/compose.ts`](../../apps/api/src/compose.ts), and let the
+[`services/api/src/compose.ts`](../../services/api/src/compose.ts), and let the
 consumer import only the port.
 
 ### `pnpm check:deps`

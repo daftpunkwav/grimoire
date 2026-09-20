@@ -11,6 +11,8 @@
  * - The cookie is the source of truth for SSR (so the server can render
  *   the matching locale); localStorage is a client-only convenience for
  *   offline boot.
+ * - Production cookies are marked `Secure`; the flag is gated on `window.isSecureContext`
+ *   so localhost development still works.
  */
 
 import { DEFAULT_LOCALE, normalizeLocale, type AppLocale } from "../locale.js";
@@ -34,7 +36,15 @@ function readCookie(): string | null {
 
 function writeCookie(locale: AppLocale): void {
   if (typeof document === "undefined") return;
-  document.cookie = `${COOKIE_NAME}=${encodeURIComponent(locale)}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  const secure = typeof window !== "undefined" && window.isSecureContext;
+  const parts = [
+    `${COOKIE_NAME}=${encodeURIComponent(locale)}`,
+    "Path=/",
+    `Max-Age=${COOKIE_MAX_AGE}`,
+    "SameSite=Lax",
+  ];
+  if (secure) parts.push("Secure");
+  document.cookie = parts.join("; ");
 }
 
 export function makeStorageAdapter() {

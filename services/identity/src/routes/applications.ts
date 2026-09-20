@@ -12,7 +12,7 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate, requireAuth, requirePermission, requireRole, badRequest, conflict, param } from '@core/foundation';
+import { validate, requireAuth, requirePermission, requireRole, badRequest, conflict, param } from '@grimoire/foundation';
 import type { PrismaClient } from '@prisma/client';
 import { applyApplicationDecision } from '../services/applicationReview.js';
 

@@ -15,7 +15,7 @@
  * - On decrypt failure the function returns '' and never leaks ciphertext as plaintext.
  */
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import type { ByokConfig } from '@core/contracts';
+import type { ByokConfig } from '@grimoire/contracts';
 import { logger } from './logger.js';
 
 const ALGO = 'aes-256-gcm';

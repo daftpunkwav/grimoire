@@ -3,7 +3,7 @@
 > 语言：**简体中文** | [English](http-api.md)
 
 `services/api` 暴露的全部 HTTP 路由。路由按所属 service 分组;组合根在
-[`apps/api/src/app.ts`](../../apps/api/src/app.ts) 中挂载。
+[`services/api/src/app.ts`](../../services/api/src/app.ts) 中挂载。
 
 约定:
 

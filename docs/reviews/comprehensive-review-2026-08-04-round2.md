@@ -58,8 +58,8 @@
 | 编号 | 主题 | 当前状态 | 关键证据 |
 |---|---|---|---|
 | SEC-01 | Token 存 localStorage | 仍存在 | `apps/web/src/lib/apiToken.ts:3-22` |
-| SEC-02 | Tool Loop Observation 未消毒 | 仍存在 | `apps/api/src/lib/llm/tools/toolLoop.ts:130-136` |
-| SEC-03 | BYOK DNS rebinding 窗口 | 仍存在 | `apps/api/src/lib/byokUrlPolicy.ts:58-84`（R2-04 进一步强化） |
+| SEC-02 | Tool Loop Observation 未消毒 | 仍存在 | `services/api/src/lib/llm/tools/toolLoop.ts:130-136` |
+| SEC-03 | BYOK DNS rebinding 窗口 | 仍存在 | `services/api/src/lib/byokUrlPolicy.ts:58-84`（R2-04 进一步强化） |
 | SEC-04 | 错误脱敏依赖 `NODE_ENV` | 仍存在 | `errorHandler.ts:58-64` |
 | SEC-05 | Agent 限流粒度不足 | 仍存在 | `app.ts:55-77` |
 | SEC-06 | 提权无审计 | 仍存在（R2-05 字段级强化） | `applications.ts:82-127` |
@@ -99,8 +99,8 @@
 ### R2-01 · Critical：API 进程无 SIGTERM/SIGINT 与 Prisma 关闭钩子
 
 **事实（已核验）**
-- `apps/api/src/index.ts:1-10` 仅 `app.listen(port, ...)`，无 `process.on` 注册。
-- `apps/api/src/lib/prisma.ts:1-13` 单例无 `beforeExit`/`$disconnect` 钩子。
+- `services/api/src/index.ts:1-10` 仅 `app.listen(port, ...)`，无 `process.on` 注册。
+- `services/api/src/lib/prisma.ts:1-13` 单例无 `beforeExit`/`$disconnect` 钩子。
 - 全仓 `grep`：`process.exit|SIGTERM|SIGINT|gracefulShutdown` 命中 0（除 seed.ts 的 `process.exit(1)`）。
 
 **影响**
@@ -145,8 +145,8 @@
 ### R2-04 · High：BYOK `fetch` 未显式 `redirect: 'manual'`，跟随 3xx 后绕过 hostname 策略
 
 **事实（已核验）**
-- `apps/api/src/lib/llm/adapters/anthropicMessages.ts:70-81, 94-105`、`:267-277`、`openaiChat.ts:39-48`、`openaiResponses.ts:28-42` 全部 `fetch(url, {...})`。
-- 全仓 `grep "redirect:" apps/api/src/lib/llm` 无任何输出——Node 18+ `fetch` 默认 `redirect: 'follow'`。
+- `services/api/src/lib/llm/adapters/anthropicMessages.ts:70-81, 94-105`、`:267-277`、`openaiChat.ts:39-48`、`openaiResponses.ts:28-42` 全部 `fetch(url, {...})`。
+- 全仓 `grep "redirect:" services/api/src/lib/llm` 无任何输出——Node 18+ `fetch` 默认 `redirect: 'follow'`。
 - 配合 R1 SEC-03 的 hostname-only 策略，重定向到 `169.254.169.254`（云元数据）或内网服务将**完全无防护**。
 
 **影响**
@@ -161,7 +161,7 @@
 
 **事实（已核验）**
 - `apps/api/prisma/schema.prisma:81-100` `AuthorApplication` 模型无 `reviewerId`/`reviewedByIp`/`reviewerUa`。
-- `apps/api/src/routes/applications.ts:102-121` 审批写事务仅 `update({ status, reviewedAt, pendingGuard: null })`。
+- `services/api/src/routes/applications.ts:102-121` 审批写事务仅 `update({ status, reviewedAt, pendingGuard: null })`。
 - 对比 `Annotation.reviewer`（`schema.prisma:209-213`，`routes/annotations.ts:142-150`）：同领域已有 `reviewerId`/`reviewedAt`/`reviewBy`，AuthorApplication 与之**未对齐**。
 - `grep` 不到 `AuditEvent` 表或独立审计日志。
 
@@ -176,7 +176,7 @@
 ### R2-06 · High：HttpOnly 迁移前需先实现 CSRF 防护
 
 **事实（已核验）**
-- `apps/api/src/app.ts:24-31`：`cors({ origin: [...], credentials: true })` 显式允许携带凭据；无 `Origin` 校验、无 CSRF token 机制；`grep csrf|sameSite` 在 `apps/api/src` 命中 0。
+- `services/api/src/app.ts:24-31`：`cors({ origin: [...], credentials: true })` 显式允许携带凭据；无 `Origin` 校验、无 CSRF token 机制；`grep csrf|sameSite` 在 `apps/api/src` 命中 0。
 - `docs/roadmap/httponly-cookie-migration.md` 已识别需要 HttpOnly 迁移，但**未**配套 CSRF 防护。
 
 **影响**
@@ -194,7 +194,7 @@
 
 **事实（已核验）**
 - `apps/api/prisma/schema.prisma:29`：`preferences String @default("{}")`。
-- `apps/api/src/routes/auth.ts:160-176` 与 `routes/settings.ts:95-162` PATCH 走 read-modify-write，无事务、无 row-level lock、无乐观锁。
+- `services/api/src/routes/auth.ts:160-176` 与 `routes/settings.ts:95-162` PATCH 走 read-modify-write，无事务、无 row-level lock、无乐观锁。
 
 **影响**
 - 并发更新同一用户（一边改 BYOK，一边改 `agentStyle`）会丢更新：后者把前者的 `preferences.byok` 一并覆盖回旧值，导致用户 BYOK 静默丢失。
@@ -209,9 +209,9 @@
 
 **事实（已核验）**
 - `grep prometheus|opentelemetry|metrics|tracing` 在 `apps/api/src` 命中 0（除 pino-pretty）。
-- `apps/api/src/lib/logger.ts:1-18` 仅配 `level` 与 pretty transport，**无** `redact: { paths: [...] }`。
-- `apps/api/src/lib/llm/providerHttp.ts:5-14` `LlmCallError.diagnostic = {url, raw}`：`raw` 是上游 500 字节响应原文，可能含 API key 反射、X-Request-Id、组织 ID、账户余额等。
-- `apps/api/src/app.ts:38-53` 与 `errorHandler.ts:47-57` 把 `req.originalUrl`（含 query）入日志。
+- `services/api/src/lib/logger.ts:1-18` 仅配 `level` 与 pretty transport，**无** `redact: { paths: [...] }`。
+- `services/api/src/lib/llm/providerHttp.ts:5-14` `LlmCallError.diagnostic = {url, raw}`：`raw` 是上游 500 字节响应原文，可能含 API key 反射、X-Request-Id、组织 ID、账户余额等。
+- `services/api/src/app.ts:38-53` 与 `errorHandler.ts:47-57` 把 `req.originalUrl`（含 query）入日志。
 
 **影响**
 - 上游 4xx/5xx 错误体可能含凭据元数据，落到日志聚合后反向定位第三方账户。
@@ -226,7 +226,7 @@
 ### R2-09 · High：SQLite → PG 后 `contains` 大小写敏感 + 无 GIN 索引
 
 **事实（已核验）**
-- `apps/api/src/routes/articles.ts:100-105`、`domains.ts:96-100`：搜索 `q` 走 `tags: { contains: q }` / `title: { contains: q }`。
+- `services/api/src/routes/articles.ts:100-105`、`domains.ts:96-100`：搜索 `q` 走 `tags: { contains: q }` / `title: { contains: q }`。
 - SQLite 默认 LIKE 大小写不敏感；PostgreSQL `LIKE` 默认**大小写敏感**，Prisma `contains` 在 PG 上也是大小写敏感。
 - `docs/operations/postgres.md` 未声明这一行为差异；schema 中 tags/summary 字段无 `pg_trgm` 索引。
 
@@ -241,7 +241,7 @@
 ### R2-10 · Medium：SSE 无 keep-alive comment 与活动连接追踪
 
 **事实（已核验）**
-- `apps/api/src/lib/sse.ts:1-33` 三个函数无 `res.write(': ping\n\n')`，无连接集合，无 `res.on('close')` 主动通知。
+- `services/api/src/lib/sse.ts:1-33` 三个函数无 `res.write(': ping\n\n')`，无连接集合，无 `res.on('close')` 主动通知。
 - `routes/agent.ts:155-353` / `:440-617` 在 `req.on('close')` 之外不发送心跳。
 - `apps/web/src/lib/agentStream.ts:30-115` 客户端 28s 超时只触发 abort，无重连。
 
@@ -257,10 +257,10 @@
 ### R2-11 · Medium：四类模块级 `Map/let` 多实例分裂语义未声明
 
 **事实（已核验）**
-- `apps/api/src/lib/llm/providers.ts:33-86`：`_providers` 模块级缓存；多实例各自缓存，env 热更不生效。
-- `apps/api/src/services/agentConversation.ts:22-35`：`lastPurgeAt` 节流；多实例各自扫表清理。
-- `apps/api/src/routes/articles.ts:33-48`：`viewedCache` 进程内 Map；多实例让阅读量虚高 2-N 倍。
-- `apps/api/src/lib/llm/tools/registry.ts:9-23`：工具注册表静态只读——OK。
+- `services/api/src/lib/llm/providers.ts:33-86`：`_providers` 模块级缓存；多实例各自缓存，env 热更不生效。
+- `services/api/src/services/agentConversation.ts:22-35`：`lastPurgeAt` 节流；多实例各自扫表清理。
+- `services/api/src/routes/articles.ts:33-48`：`viewedCache` 进程内 Map；多实例让阅读量虚高 2-N 倍。
+- `services/api/src/lib/llm/tools/registry.ts:9-23`：工具注册表静态只读——OK。
 
 **影响**
 - 阅读量统计被多实例放大；过期会话清理时间窗错峰；Provider 缓存无法热更。
@@ -275,8 +275,8 @@
 ### R2-12 · Medium：Prisma 连接池/helmet/Node 版本三方配置脱节
 
 **事实（已核验）**
-- `apps/api/src/lib/prisma.ts:1-13`：无 `connection_limit` / `pool_timeout`。
-- `apps/api/src/app.ts:24`：`helmet()` 用默认配置，**无** `contentSecurityPolicy`/`hsts`/`crossOriginEmbedderPolicy`。
+- `services/api/src/lib/prisma.ts:1-13`：无 `connection_limit` / `pool_timeout`。
+- `services/api/src/app.ts:24`：`helmet()` 用默认配置，**无** `contentSecurityPolicy`/`hsts`/`crossOriginEmbedderPolicy`。
 - `apps/web/index.html:7-13`：通过 `fonts.googleapis.com` 加载字体；与生产 CSP 收紧不兼容。
 - CI `node-version: '20'` 与 README `engines.node >= 20.3` 不一致；`.nvmrc` 缺失。
 
@@ -294,7 +294,7 @@
 
 **事实（已核验）**
 - 业务时间字段在应用层用 `new Date()` 写入（如 `reviewedAt`、`publishedAt`）；Prisma `@default(now())` 仅覆盖 `createdAt`。
-- `apps/api/src/routes/applications.ts:97-99` 列表按 `createdAt desc` 但 schema 无 `@@index([createdAt])`。
+- `services/api/src/routes/applications.ts:97-99` 列表按 `createdAt desc` 但 schema 无 `@@index([createdAt])`。
 - `Topic.status` 用字符串多值；`Annotation.status`/`Article.status`/`Application.status` 三种不同的"软删/状态"语义在 admin UI 上拼装混乱。
 
 **影响**
@@ -310,8 +310,8 @@
 ### R2-14 · Medium：SSE 单飞缺失与限流 store 内存化
 
 **事实（已核验）**
-- `apps/api/src/routes/agent.ts:209-241` 早停仅在单实例内有效；多实例下"已生成"信号不共享，可能同时对同一 topic 全量生成。
-- `apps/api/src/app.ts:55-77` 四个 limiter 用 `express-rate-limit@7.5.1` 默认内存 store；多实例下"每实例 120/min"实际变成 N × 120。
+- `services/api/src/routes/agent.ts:209-241` 早停仅在单实例内有效；多实例下"已生成"信号不共享，可能同时对同一 topic 全量生成。
+- `services/api/src/app.ts:55-77` 四个 limiter 用 `express-rate-limit@7.5.1` 默认内存 store；多实例下"每实例 120/min"实际变成 N × 120。
 
 **影响**
 - 同一文章被多用户并发悬停时，多实例可能同时生成同一 topic 答案，浪费 token。
@@ -325,8 +325,8 @@
 ### R2-15 · Medium：聊天历史累积、搜索 `contains` 与 JSON 写热点
 
 **事实（已核验）**
-- `apps/api/src/services/agentOrchestrator.ts:140-186` 每次 chat 拉 12 条消息 + `loadUserContext`（`agentMemory.ts:66-120`）走 `findUnique` + `findMany`，无 LRU。
-- `apps/api/src/services/hoverCache.ts:52-55` 命中即 `updateMany hits+1`，fire-and-forget；并发 N 次命中 → N 次行级锁等待。
+- `services/api/src/services/agentOrchestrator.ts:140-186` 每次 chat 拉 12 条消息 + `loadUserContext`（`agentMemory.ts:66-120`）走 `findUnique` + `findMany`，无 LRU。
+- `services/api/src/services/hoverCache.ts:52-55` 命中即 `updateMany hits+1`，fire-and-forget；并发 N 次命中 → N 次行级锁等待。
 - `articles.ts`/`domains.ts` `contains` 全文扫，PG 切换后更慢。
 - `express.json({ limit: '1mb' })` 全局 1MB；`markdown` 字段无 `.max()`；长 markdown 触发 SQLite `string or blob too big` 或 PG `string_agg` 上限。
 
@@ -344,8 +344,8 @@
 ### R2-16 · Medium：SSE 中间事件日志与 trace 串联
 
 **事实（已核验）**
-- `apps/api/src/lib/llm/tools/toolLoop.ts:103-106, 142-146` 仅在结束/超限时打点；中间轮耗时不可见。
-- `apps/api/src/app.ts:33-37`：`res.locals.requestId = randomUUID().slice(0, 8)` —— 8 hex 字符 = 32 bit，生日碰撞约 2^16 次请求即 50% 概率碰撞同一 requestId。
+- `services/api/src/lib/llm/tools/toolLoop.ts:103-106, 142-146` 仅在结束/超限时打点；中间轮耗时不可见。
+- `services/api/src/app.ts:33-37`：`res.locals.requestId = randomUUID().slice(0, 8)` —— 8 hex 字符 = 32 bit，生日碰撞约 2^16 次请求即 50% 概率碰撞同一 requestId。
 - LLM 调用日志（`providers.ts:166-176, 181-194, 210-221`）未把 `requestId` 注入；只靠 Pino "同一进程同一时间窗"串联。
 - `errorHandler.ts` 记 `requestId`，但 `agentOrchestrator.llmError` 未把 `res.locals.requestId` 透传。
 
@@ -377,7 +377,7 @@
 ### R2-18 · Medium：`/health` 不感知依赖
 
 **事实（已核验）**
-- `apps/api/src/app.ts:69-71`：`/health` 返回 `{ok:true, service, ts}`，未检查 DB 是否可达、provider 是否配置。
+- `services/api/src/app.ts:69-71`：`/health` 返回 `{ok:true, service, ts}`，未检查 DB 是否可达、provider 是否配置。
 
 **影响**
 - LB / k8s liveness 探针命中该端点不会把"DB 断连"实例剔出——流量继续打向坏实例。
@@ -452,7 +452,7 @@
 ### R2-24 · Low：Article slug PATCH 缺事务兜底
 
 **事实（已核验）**
-- `apps/api/src/routes/articles.ts:248-256` PATCH slug 走先 `findUnique` 再 `update`，无事务；`@unique([slug])`（`schema.prisma:105`）并发冲突走 P2002 冒泡，外层 catch 仍可能转 500。
+- `services/api/src/routes/articles.ts:248-256` PATCH slug 走先 `findUnique` 再 `update`，无事务；`@unique([slug])`（`schema.prisma:105`）并发冲突走 P2002 冒泡，外层 catch 仍可能转 500。
 - `errorHandler.ts:26-44` 已具备 `P2002 → 409 CONFLICT` 处理，但这里路径需在事务内/外层 catch 显式拦截。
 
 **建议**
@@ -461,7 +461,7 @@
 ### R2-25 · Low：Hover cache 截断策略与 key 不一致
 
 **事实（已核验）**
-- `apps/api/src/services/hoverCache.ts:26-28` 计算 `cacheKey` 用 `topic.slice(0, 400)` 归一化。
+- `services/api/src/services/hoverCache.ts:26-28` 计算 `cacheKey` 用 `topic.slice(0, 400)` 归一化。
 - `hoverCache.ts:62-66` 写库时 `topic.slice(0, 200), answer.slice(0, 1200)`。
 - 写库 topic 长度小于 key 计算长度——70-200 字符之间的两段不同原文可能被截到同一 `topic`，使 `findUnique({ cacheKey })` 命中旧记录但读取后认为它是新 query 答案。
 - `answer.slice(0, 1200)` 截断会丢失 `isSafeHoverPublicAnswer` 已通过的尾部。
@@ -486,8 +486,8 @@
 ### R2-27 · Low：articles `animations` PATCH 缺事务；Topic status 语义未集中
 
 **事实（已核验）**
-- `apps/api/src/routes/articles.ts:265-274`：三个 query（`deleteMany` → `createMany` → `update`）顺序执行，无事务。
-- `apps/api/src/routes/topics.ts` 软删后状态机分支膨胀（`'open' | 'closed' | 'deleted'`，但代码只识别 `'deleted'`）。
+- `services/api/src/routes/articles.ts:265-274`：三个 query（`deleteMany` → `createMany` → `update`）顺序执行，无事务。
+- `services/api/src/routes/topics.ts` 软删后状态机分支膨胀（`'open' | 'closed' | 'deleted'`，但代码只识别 `'deleted'`）。
 
 **影响**
 - 中途进程重启或别的事务干预会出现"文章 status updated but animations 中间状态"。
@@ -559,17 +559,17 @@
 
 | 主题 | 路径 |
 |---|---|
-| 入口与关闭 | `apps/api/src/index.ts:1-10`、`apps/api/src/lib/prisma.ts:1-13` |
+| 入口与关闭 | `services/api/src/index.ts:1-10`、`services/api/src/lib/prisma.ts:1-13` |
 | 部署配置 | `.npmrc:1-2`、`docker-compose.yml:1-23`、`.github/workflows/ci.yml:1-29` |
-| BYOK 重定向 | `apps/api/src/lib/llm/adapters/{anthropicMessages,openaiChat,openaiResponses}.ts` |
-| AuthorApplication 审批 | `apps/api/src/routes/applications.ts:82-127`、`apps/api/prisma/schema.prisma:81-100` |
-| User.preferences 写竞争 | `apps/api/src/routes/auth.ts:160-176`、`apps/api/src/routes/settings.ts:95-162` |
-| Pino 日志 | `apps/api/src/lib/logger.ts:1-18`、`apps/api/src/middleware/errorHandler.ts:47-57`、`apps/api/src/lib/llm/providerHttp.ts:5-14` |
-| 搜索 contains | `apps/api/src/routes/articles.ts:100-105`、`apps/api/src/routes/domains.ts:96-100` |
-| SSE 资源生命周期 | `apps/api/src/lib/sse.ts:1-33`、`apps/web/src/lib/agentStream.ts:30-115` |
-| Prisma 单例与 helmet | `apps/api/src/lib/prisma.ts:1-13`、`apps/api/src/app.ts:24,69-71` |
-| 限流 store | `apps/api/src/app.ts:55-77` |
-| Hover cache 截断 | `apps/api/src/services/hoverCache.ts:26-66` |
+| BYOK 重定向 | `services/api/src/lib/llm/adapters/{anthropicMessages,openaiChat,openaiResponses}.ts` |
+| AuthorApplication 审批 | `services/api/src/routes/applications.ts:82-127`、`apps/api/prisma/schema.prisma:81-100` |
+| User.preferences 写竞争 | `services/api/src/routes/auth.ts:160-176`、`services/api/src/routes/settings.ts:95-162` |
+| Pino 日志 | `services/api/src/lib/logger.ts:1-18`、`services/api/src/middleware/errorHandler.ts:47-57`、`services/api/src/lib/llm/providerHttp.ts:5-14` |
+| 搜索 contains | `services/api/src/routes/articles.ts:100-105`、`services/api/src/routes/domains.ts:96-100` |
+| SSE 资源生命周期 | `services/api/src/lib/sse.ts:1-33`、`apps/web/src/lib/agentStream.ts:30-115` |
+| Prisma 单例与 helmet | `services/api/src/lib/prisma.ts:1-13`、`services/api/src/app.ts:24,69-71` |
+| 限流 store | `services/api/src/app.ts:55-77` |
+| Hover cache 截断 | `services/api/src/services/hoverCache.ts:26-66` |
 | 前端 ARIA | `apps/web/src/pages/{HomePage,KnowledgeOverviewPage,AuthorDashboard}.tsx`、`author/ApplicationsAdminPage.tsx` |
 
 ---

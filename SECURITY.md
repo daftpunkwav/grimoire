@@ -30,8 +30,9 @@ Security-relevant surfaces, in rough priority order:
   `packages/foundation/src/byokUrlPolicy.ts` (and helpers in
   `services/llm`): outbound URL validation applied before provider requests.
 - **Rate limiting and request body caps** —
-  `packages/foundation/src/middleware/*` and the per-route
-  `express-rate-limit` configuration in each service's `routes/`.
+  `packages/foundation/src/{auth,errorHandler,attachUserRefs}.ts` and the
+  per-route `express-rate-limit` configuration in each service's
+  `routes/`.
 - **Annotation ACL enforcement** —
   `services/content/src/services/annotationAcl.ts`: visibility filtering
   (guest → approved only) and moderation gating.

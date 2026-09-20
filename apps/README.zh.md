@@ -15,7 +15,7 @@
 
 ## 规则
 
-- `apps/api/` 是组合根。所有跨服务装配集中在 `apps/api/src/compose.ts`。
+- `apps/api/` 是组合根。所有跨服务装配集中在 `services/api/src/compose.ts`。
   其他服务文件只能从 `@grimoire/contracts`(port 接口)导入,绝不从另一个
   服务的源码导入。
 - `apps/web/` 仅依赖 `@grimoire/contracts` 与 `@grimoire/foundation`。

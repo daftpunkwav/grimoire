@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, ApiError } from '@/lib/api';
-import type { AnnotationItem, ArticleDetail } from '@core/contracts';
+import type { AnnotationItem, ArticleDetail } from '@grimoire/contracts';
 import { ArticleBody } from '@/components/article/ArticleBody';
 import { ArticleLayout, ArticleTags } from '@/components/article/ArticleLayout';
 import { Button } from '@/components/ui/Button';

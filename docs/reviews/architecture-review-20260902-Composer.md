@@ -40,8 +40,8 @@
 | 4 | P2 | 严重 | `services/api/prisma/schema.prisma:1-322` | 15 模型单 SQLite/Prisma 库；各域服务均注入同一 `PrismaClient` | 物理层未隔离；跨域约束仅靠脚本 + 自律 |
 | 5 | P2 | 高 | `services/agent/src/services/userContextCache.ts:41-48` 等 | 进程内单例缓存（用户上下文、浏览去重、API refresh 单飞） | 多实例部署缓存/计数不一致 |
 | 6 | P2 | 高 | `services/agent/src/services/agentOrchestrator.ts:21-24` | Orchestrator 依赖并 re-export `routes/schemas.ts` 的 Zod 类型 | 编排层与路由层反向耦合，替换 orchestrator 牵动路由 schema |
-| 7 | P2 | 高 | `openwiki/architecture/overview.md:10-57` 等 | 文档仍写 `apps/api`、`@agentforge/shared`、端口 5280/3001；源码为 `services/api`、`@core/contracts`、8180/8181 | 新人按 wiki 无法启动/找代码 |
-| 8 | P1 | 高 | `services/agent/src/services/agentMemory.ts:26-33` | 引用未定义的 `UserCtx` 类型 → `npm run typecheck` 在 `@core/agent` 失败 | CI 若启用全量 typecheck 将阻断合并 |
+| 7 | P2 | 高 | `openwiki/architecture/overview.md:10-57` 等 | 文档仍写 `apps/api`、`@agentforge/shared`、端口 5280/3001；源码为 `services/api`、`@grimoire/contracts`、8180/8181 | 新人按 wiki 无法启动/找代码 |
+| 8 | P1 | 高 | `services/agent/src/services/agentMemory.ts:26-33` | 引用未定义的 `UserCtx` 类型 → `npm run typecheck` 在 `@grimoire/agent` 失败 | CI 若启用全量 typecheck 将阻断合并 |
 | 9 | P2 | 高 | `apps/web/src/lib/apiToken.ts:3-22` | Access/Refresh Token 存 `localStorage` | XSS 可窃取会话（与 httponly cookie 迁移文档意图相悖） |
 | 10 | P3 | 中 | `apps/web` | 仅 `client.test.ts` 1 个测试；10k+ 行 UI 无组件/Hook 回归网 | 前端重构无自动化护栏 |
 
@@ -202,7 +202,7 @@ sequenceDiagram
 
 #### 2.1.4 依赖出入度
 
-- 出度：仅 `@core/contracts`（类型）+ 本地模块；**不** import 任何 `@core/{service}`
+- 出度：仅 `@grimoire/contracts`（类型）+ 本地模块；**不** import 任何 `@core/{service}`
 - 入度：无（前端叶子）
 
 #### 2.1.5 对外暴露面
@@ -295,7 +295,7 @@ sequenceDiagram
 ### 2.8 模块：`packages/contracts`
 
 - [P1/严重] `packages/contracts/src/hoverSanitize.ts:1-630`：运行时正则 + 导出函数，非纯类型契约。与 `dto.ts`（179 行）同包。修复方向：迁出净化实现或拆子包。
-- [P3/中] 包名 `@core/contracts` 与项目名 AgentForge/Grimoire 不一致（workspace 惯例 `@core/*`，可接受但文档需统一）。
+- [P3/中] 包名 `@grimoire/contracts` 与项目名 AgentForge/Grimoire 不一致（workspace 惯例 `@core/*`，可接受但文档需统一）。
 
 ---
 
@@ -524,7 +524,7 @@ sequenceDiagram
 ### 10.2 可测性
 
 - 单例缓存均提供 `setDefault*` 注入（`userContextCache`、`viewTracking`）✅
-- `typecheck`：`@core/agent` **失败**（`UserCtx`）❌
+- `typecheck`：`@grimoire/agent` **失败**（`UserCtx`）❌
 
 ### 10.3 违例项
 
@@ -642,7 +642,7 @@ npm test
 
 # 类型检查
 npm run typecheck
-# → @core/agent 失败: agentMemory.ts(26,47): Cannot find name 'UserCtx'
+# → @grimoire/agent 失败: agentMemory.ts(26,47): Cannot find name 'UserCtx'
 ```
 
 未使用 `madge`/`depcruise`（离线手写 Tarjan 替代，见 §3.1.1 兜底路径）。

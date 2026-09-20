@@ -9,8 +9,8 @@
  *
  * No request handling here — pure error-shape mapping.
  */
-import { logger, AppError } from '@core/foundation';
-import type { LlmGatewayPort } from '@core/contracts';
+import { logger, AppError } from '@grimoire/foundation';
+import type { LlmGatewayPort } from '@grimoire/contracts';
 
 /** Map an LLM call error to a client-safe `AppError`. */
 export function mapLlmError(llm: Pick<LlmGatewayPort, 'isLlmCallError'>, err: unknown): AppError {

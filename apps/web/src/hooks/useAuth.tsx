@@ -7,8 +7,8 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { PublicUser } from '@core/contracts';
-import { can, isAdminLike, isAuthorLike, roleLabel } from '@core/contracts';
+import type { PublicUser } from '@grimoire/contracts';
+import { can, isAdminLike, isAuthorLike, roleLabel } from '@grimoire/contracts';
 import { api, ApiError, clearTokens, getRefreshToken, getToken, setTokens } from '@/lib/api';
 
 interface AuthCtx {

@@ -12,9 +12,9 @@ COPY services/content/package.json services/content/package.json
 COPY services/community/package.json services/community/package.json
 COPY services/agent/package.json services/agent/package.json
 RUN npm ci \
-  --workspace=@core/contracts --workspace=@core/foundation --workspace=@core/llm \
-  --workspace=@core/identity --workspace=@core/content --workspace=@core/community \
-  --workspace=@core/agent --workspace=@core/api
+  --workspace=@grimoire/contracts --workspace=@grimoire/foundation --workspace=@grimoire/llm \
+  --workspace=@grimoire/identity --workspace=@grimoire/content --workspace=@grimoire/community \
+  --workspace=@grimoire/agent --workspace=@grimoire/api
 COPY packages/contracts packages/contracts
 COPY packages/foundation packages/foundation
 COPY services/api services/api
@@ -24,9 +24,9 @@ COPY services/content services/content
 COPY services/community services/community
 COPY services/agent services/agent
 RUN npm run build \
-  --workspace=@core/contracts --workspace=@core/foundation --workspace=@core/llm \
-  --workspace=@core/identity --workspace=@core/content --workspace=@core/community \
-  --workspace=@core/agent --workspace=@core/api
+  --workspace=@grimoire/contracts --workspace=@grimoire/foundation --workspace=@grimoire/llm \
+  --workspace=@grimoire/identity --workspace=@grimoire/content --workspace=@grimoire/community \
+  --workspace=@grimoire/agent --workspace=@grimoire/api
 RUN npx --prefix services/api prisma generate
 
 FROM node:20-alpine AS runtime
@@ -42,9 +42,9 @@ COPY --from=build /repo/services/content/package.json services/content/package.j
 COPY --from=build /repo/services/community/package.json services/community/package.json
 COPY --from=build /repo/services/agent/package.json services/agent/package.json
 RUN npm ci --omit=dev \
-  --workspace=@core/contracts --workspace=@core/foundation --workspace=@core/llm \
-  --workspace=@core/identity --workspace=@core/content --workspace=@core/community \
-  --workspace=@core/agent --workspace=@core/api
+  --workspace=@grimoire/contracts --workspace=@grimoire/foundation --workspace=@grimoire/llm \
+  --workspace=@grimoire/identity --workspace=@grimoire/content --workspace=@grimoire/community \
+  --workspace=@grimoire/agent --workspace=@grimoire/api
 # 编译产物 + Prisma schema（迁移/生成用）+ 生成的 Prisma Client
 COPY --from=build /repo/packages/contracts/dist packages/contracts/dist
 COPY --from=build /repo/packages/foundation/dist packages/foundation/dist

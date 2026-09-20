@@ -20,10 +20,10 @@ import {
   endSseSession,
   sseWrite,
   softStreamHoverAnswer,
-} from '@core/foundation';
-import { extractVisibleAnswer } from '@core/foundation';
-import type { LlmResponse, ProviderConfig, StreamChunk } from '@core/contracts';
-import { extractHoverAnswer, looksLikeHoverPlanning, LLM_TOKEN_LIMITS } from '@core/contracts';
+} from '@grimoire/foundation';
+import { extractVisibleAnswer } from '@grimoire/foundation';
+import type { LlmResponse, ProviderConfig, StreamChunk } from '@grimoire/contracts';
+import { extractHoverAnswer, looksLikeHoverPlanning, LLM_TOKEN_LIMITS } from '@grimoire/contracts';
 import { explainSchemaFixed } from '../schemas.js';
 import { createStreamConsumer } from '../lib/streamConsumers.js';
 import { AGENT_MODE_META } from '../lib/agentPrompt.js';

@@ -12,20 +12,23 @@
  *   and file-lock release jitter observed in this environment.
  */
 
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+
+const r = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@grimoire/contracts": new URL("./packages/contracts/src/index.ts", import.meta.url).pathname,
-      "@grimoire/foundation": new URL("./packages/foundation/src/index.ts", import.meta.url).pathname,
-      "@grimoire/llm": new URL("./services/llm/src/index.ts", import.meta.url).pathname,
-      "@grimoire/identity": new URL("./services/identity/src/index.ts", import.meta.url).pathname,
-      "@grimoire/content": new URL("./services/content/src/index.ts", import.meta.url).pathname,
-      "@grimoire/community": new URL("./services/community/src/index.ts", import.meta.url).pathname,
-      "@grimoire/agent": new URL("./services/agent/src/index.ts", import.meta.url).pathname,
-      "@grimoire/api": new URL("./services/api/src", import.meta.url).pathname,
-      "@grimoire/web": new URL("./apps/web/src", import.meta.url).pathname,
+      "@grimoire/contracts": r("./packages/contracts/src/index.ts"),
+      "@grimoire/foundation": r("./packages/foundation/src/index.ts"),
+      "@grimoire/llm": r("./services/llm/src/index.ts"),
+      "@grimoire/identity": r("./services/identity/src/index.ts"),
+      "@grimoire/content": r("./services/content/src/index.ts"),
+      "@grimoire/community": r("./services/community/src/index.ts"),
+      "@grimoire/agent": r("./services/agent/src/index.ts"),
+      "@grimoire/api": r("./services/api/src"),
+      "@grimoire/web": r("./apps/web/src"),
     },
   },
   test: {
@@ -42,7 +45,7 @@ export default defineConfig({
       all: true,
       reporter: ["text", "json-summary"],
       reportsDirectory: "cov-report",
-      clean: false,
+      clean: true,
       include: [
         "packages/*/src/**/*.ts",
         "services/*/src/**/*.ts",

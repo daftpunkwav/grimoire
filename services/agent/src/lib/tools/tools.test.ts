@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createToolRegistry } from './registry.js';
 import { createToolLoop } from './toolLoop.js';
 import { parseToolCall, hasToolCall } from './parseToolCall.js';
-import type { ProviderConfig } from '@core/contracts';
+import type { ProviderConfig } from '@grimoire/contracts';
 import type { ArticleQueryPort, LlmGatewayPort } from '../../ports.js';
 
 const provider: ProviderConfig = {

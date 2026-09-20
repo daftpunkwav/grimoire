@@ -12,8 +12,8 @@
  * This module never touches the `user` or `article` tables directly — preferences go through the users port and titles through the articles port.
  */
 import { createHash } from 'node:crypto';
-import { logger } from '@core/foundation';
-import type { ByokConfig } from '@core/contracts';
+import { logger } from '@grimoire/foundation';
+import type { ByokConfig } from '@grimoire/contracts';
 import { formatMemoryBlock } from '../lib/agentPrompt.js';
 import type { UserQueryPort, ArticleQueryPort } from '../ports.js';
 import { getDefaultUserContextCache } from './userContextCache.js';

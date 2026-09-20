@@ -42,7 +42,7 @@
 ### 2.2 当前实现（Current）
 
 - API：`POST /api/v1/agent/explain`、`/explain/stream`，`mode: hover | click`
-- Prompt：`buildHoverSystem`（`apps/api/src/lib/llm/agentPrompt.ts`）
+- Prompt：`buildHoverSystem`（`services/api/src/lib/llm/agentPrompt.ts`）
 - 净化：`extractHoverAnswer` / `isCompleteHoverAnswer` 等在 **`packages/shared/src/hoverSanitize.ts`**（前后端共用）
 - 记忆：`loadUserContext` → `formatMemoryBlock` 注入 system（匿名仅含 route）
 - 缓存：
@@ -111,14 +111,14 @@ User Message
 
 | 模块 | 路径/表 |
 |------|---------|
-| Prompt | `apps/api/src/lib/llm/agentPrompt.ts` |
+| Prompt | `services/api/src/lib/llm/agentPrompt.ts` |
 | 净化 | `packages/shared/src/hoverSanitize.ts` |
-| Provider | `apps/api/src/lib/llm/providers.ts` |
-| 路由 | `apps/api/src/routes/agent.ts` |
+| Provider | `services/api/src/lib/llm/providers.ts` |
+| 路由 | `services/api/src/routes/agent.ts` |
 | 会话/消息 | `AgentConversation` / `AgentMessage` |
 | 悬停缓存 | `HoverExplainCache` + `apps/web/.../hoverExplainCache.ts` |
 | 面板 UI | `apps/web/src/components/agent/AgentFloat.tsx` |
-| 工具循环 | `apps/api/src/lib/llm/tools/`（registry / parseToolCall / toolLoop） |
+| 工具循环 | `services/api/src/lib/llm/tools/`（registry / parseToolCall / toolLoop） |
 | 卡片 UI | `apps/web/src/components/article/ArticleCardInlineAgent.tsx` |
 
 ---
@@ -147,6 +147,6 @@ User Message
 |------|------|
 | 2026-08-04 | 对照代码核对：模型/路由/工具循环/批注 API/seed 计数/hooks-lib 列表等与现状一致 |
 | 2026-08-03 | **P0 tool-loop**：`search_articles` / `get_article` + prompt-based ReAct；SSE tool_call/tool_result；面板「允许工具」 |
-| 2026-08-03 | 缓存键 `v7`；净化迁入 `@core/contracts`；明确 Agent 已在 apps/api 实装、非 501；admin 才能清缓存 |
+| 2026-08-03 | 缓存键 `v7`；净化迁入 `@grimoire/contracts`；明确 Agent 已在 apps/api 实装、非 501；admin 才能清缓存 |
 | 2026-07-23 | 对照代码纠正 TTL、mode=fast\|deep、三种 Provider 格式、MCP/Runtime 未实现 |
 | 2026-07-12 | 明确双 Agent 目标：面板 = 完整可工具智能体；悬停 = 速度优先 + 记忆 |

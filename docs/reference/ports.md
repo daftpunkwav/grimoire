@@ -55,7 +55,7 @@ imports another service's source.
 2. Implement it in the owning workspace; re-export from the workspace's
    `src/index.ts`.
 3. Register the implementation in
-   [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) inside the
+   [`services/api/src/compose.ts`](../../services/api/src/compose.ts) inside the
    matching `compose()` step.
 4. Add at least one consumer that uses the port through the
    `RuntimeComponents` bundle.

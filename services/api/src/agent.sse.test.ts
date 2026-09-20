@@ -7,9 +7,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
-import type { LlmRequest, ProviderConfig, StreamChunk } from '@core/contracts';
-import { LlmCallError } from '@core/llm';
-import type { LlmGateway } from '@core/llm';
+import type { LlmRequest, ProviderConfig, StreamChunk } from '@grimoire/contracts';
+import { LlmCallError } from '@grimoire/llm';
+import type { LlmGateway } from '@grimoire/llm';
 import type { PrismaClient } from '@prisma/client';
 import { createApp } from './app.js';
 

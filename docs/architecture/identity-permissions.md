@@ -50,5 +50,5 @@
 
 - 面板：`AgentConversation` + `AgentMessage`；>24 条时压缩最旧 8 条到 `summary`
 - 偏好：启发式写入 `AgentMemory`
-- 悬停：L2 `HoverExplainCache`（键版本 `v7`，TTL 2h / 热 24h）+ 前端 L1；净化在 `@core/contracts`
+- 悬停：L2 `HoverExplainCache`（键版本 `v7`，TTL 2h / 热 24h）+ 前端 L1；净化在 `@grimoire/contracts`
 - 进度：`POST /api/v1/agent/progress` → `LearningProgress`；`mastered` 时追加记忆

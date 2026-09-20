@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import type { ArticleSummary, DomainSummary } from '@core/contracts';
+import type { ArticleSummary, DomainSummary } from '@grimoire/contracts';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select } from '@/components/ui/Input';

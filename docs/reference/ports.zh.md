@@ -50,7 +50,7 @@ import port;没有任何消费方 import 另一个 service 的源码。
 
 1. 在 `packages/contracts/src/ports.ts` 中声明接口。
 2. 在所属工作区实现;从该工作区的 `src/index.ts` re-export。
-3. 在 [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) 对应
+3. 在 [`services/api/src/compose.ts`](../../services/api/src/compose.ts) 对应
    `compose()` 步骤中注册实现。
 4. 至少加一个通过 `RuntimeComponents` bundle 使用该 port 的消费方。
 

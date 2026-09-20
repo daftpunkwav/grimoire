@@ -1,4 +1,4 @@
-import type { AuthTokens, PublicUser } from '@core/contracts';
+import type { AuthTokens, PublicUser } from '@grimoire/contracts';
 import { BASE, request } from './client.js';
 
 export const authApi = {

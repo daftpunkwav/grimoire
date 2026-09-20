@@ -71,7 +71,7 @@ fail-fast):
 ## 约定
 
 - 组合根是唯一 import service 源码的文件。其他任何消费方(包括未来
-  `apps/api/src/routes/*`)只能从 `@grimoire/contracts` import。
+  `services/api/src/routes/*`)只能从 `@grimoire/contracts` import。
 - 服务启动顺序固定:`env → prisma → compose → listen → signal handlers`。
   顺序记录于 [../../docs/architecture/composition-root.md](../../docs/architecture/composition-root.md)。
 - Dockerfile 是生产镜像来源。CI 在 smoke job 中构建它。

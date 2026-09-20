@@ -26,11 +26,11 @@ import {
   param,
   attachUserRefs,
   logger,
-} from '@core/foundation';
+} from '@grimoire/foundation';
 import type { Article } from '@prisma/client';
 import { toArticleDetail, toArticleSummary } from '../services/serialize.js';
 import { slugify } from '../domain/slug.js';
-import type { UserSummaryPort } from '@core/contracts';
+import type { UserSummaryPort } from '@grimoire/contracts';
 import { getDefaultViewDedup } from '../services/viewTracking.js';
 import { createArticleRepository } from '../services/articleRepository.js';
 import type { PrismaClient } from '@prisma/client';

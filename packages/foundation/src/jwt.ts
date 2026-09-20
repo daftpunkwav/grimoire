@@ -13,7 +13,7 @@
  */
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
-import type { AuthorTier, UserRole } from '@core/contracts';
+import type { AuthorTier, UserRole } from '@grimoire/contracts';
 
 export interface JwtPayload {
   sub: string;

@@ -18,7 +18,7 @@
 | 目录组织(按业务域分 workspace) | `apps/` · `packages/` · `services/` 三区清晰 | ✅ 合理 |
 | 服务间源码 import | 除 `services/api` 组合根外,**零跨服务 import**(grep 实证) | ✅ 达标 |
 | 跨服务接口(ports) | 全部收敛于 `packages/contracts/src/ports.ts` | ✅ 达标(未提交,施工中) |
-| 前端与后端脱耦 | `apps/web` 仅依赖 `@core/contracts`,零后端 import | ✅ 达标 |
+| 前端与后端脱耦 | `apps/web` 仅依赖 `@grimoire/contracts`,零后端 import | ✅ 达标 |
 | 组合根唯一性 | `services/api/src/compose.ts` 是全仓唯一 import 所有服务的层 | ✅ 达标 |
 | **数据边界** | **15 个模型同一张 prisma schema、同一数据库、跨域外键(Topic→Article、Annotation→Article、LearningProgress→Article)** | ⚠️ 单体强耦合点 |
 | **独立运行能力** | 各业务域是"库",只有 `services/api` 可 listen;**无独立进程/端口/健康** | ⚠️ 未达"服务即进程" |
@@ -36,7 +36,7 @@
 ```
 AgentForge/                        # 仓库根(Grimoire)
 ├── apps/
-│   ├── web/                       # 前端:Vite 8 + React 19 + TS(仅依赖 @core/contracts)
+│   ├── web/                       # 前端:Vite 8 + React 19 + TS(仅依赖 @grimoire/contracts)
 │   ├── desktop/                   # 占位:仅 package.json + tsconfig,无 src
 │   └── mobile/                    # 占位:同上
 ├── packages/
@@ -67,14 +67,14 @@ AgentForge/                        # 仓库根(Grimoire)
 
 | 包 | dependencies | 说明 |
 |----|--------------|------|
-| `@core/contracts` | (空) | 纯类型,零依赖 ✅ |
-| `@core/foundation` | `@core/contracts` + express + zod + bcryptjs + jsonwebtoken + pino + @prisma/client | 机制层但绑定技术栈 |
-| `@core/identity` | contracts + foundation + express + prisma + zod | |
-| `@core/content` | contracts + foundation + express + prisma + zod | |
-| `@core/community` | contracts + foundation + express + prisma + zod | |
-| `@core/agent` | contracts + foundation + express + prisma + zod | |
-| `@core/llm` | contracts + foundation | ✅ 最薄,无 prisma/express |
-| `@core/api` | contracts + foundation + **identity/content/community/agent/llm(全部)** | 组合根,唯一 |
+| `@grimoire/contracts` | (空) | 纯类型,零依赖 ✅ |
+| `@grimoire/foundation` | `@grimoire/contracts` + express + zod + bcryptjs + jsonwebtoken + pino + @prisma/client | 机制层但绑定技术栈 |
+| `@grimoire/identity` | contracts + foundation + express + prisma + zod | |
+| `@grimoire/content` | contracts + foundation + express + prisma + zod | |
+| `@grimoire/community` | contracts + foundation + express + prisma + zod | |
+| `@grimoire/agent` | contracts + foundation + express + prisma + zod | |
+| `@grimoire/llm` | contracts + foundation | ✅ 最薄,无 prisma/express |
+| `@grimoire/api` | contracts + foundation + **identity/content/community/agent/llm(全部)** | 组合根,唯一 |
 | `@core/web` | contracts + react + marked + dompurify | ✅ 无任何服务依赖 |
 
 **服务之间零互相依赖** —— 这是模块化单体最核心的一条,已满足。
@@ -82,7 +82,7 @@ AgentForge/                        # 仓库根(Grimoire)
 ### 2.2 源码 import 扫描(全仓 `services/` + `apps/` + `packages/`)
 
 ```
-grep -rn "@core/identity|@core/content|@core/community|@core/agent|@core/llm" 排除 dist/node_modules
+grep -rn "@grimoire/identity|@grimoire/content|@grimoire/community|@grimoire/agent|@grimoire/llm" 排除 dist/node_modules
 → 命中仅在 services/api/src(组合根)+ 各服务 index.ts 头部注释(非 import)
 ```
 
@@ -211,7 +211,7 @@ voyager 铁律"服务之间只允许 capability 调用 / 事件流 / 契约包"�
 
 | # | 改动 | 说明 |
 |---|------|------|
-| B-1 | **每服务加独立 REST 壳** | `services/<域>/src/server.ts`:读自己的 env 前缀(`IDENTITY_PORT` 等,默认 8182+)、`createXxxRouters(...)` 后 listen,复用 `@core/foundation` 的 logger/errorHandler/sse。**业务代码零改动** |
+| B-1 | **每服务加独立 REST 壳** | `services/<域>/src/server.ts`:读自己的 env 前缀(`IDENTITY_PORT` 等,默认 8182+)、`createXxxRouters(...)` 后 listen,复用 `@grimoire/foundation` 的 logger/errorHandler/sse。**业务代码零改动** |
 | B-2 | **组合根保留两种启动模式** | `services/api`(单体,现状)与各服务独立启动并行;env 如 `SERVICE_MODE=standalone` 控制。**单体模式是默认与开发模式**,独立启动是演进验证 |
 | B-3 | **每服务暴露 `/health`** | 复用 api 的 liveness 模式,为未来 LB 探活做准备 |
 | B-4 | **openwiki 处置确认** | 保留则纳入 docs 索引或移到 docs/;否则删除。根 `tests/` 空目录删除 |
@@ -233,8 +233,8 @@ voyager 铁律"服务之间只允许 capability 调用 / 事件流 / 契约包"�
 ## 6. 依赖矩阵(目标态)
 
 ```
-apps/web            → @core/contracts
-packages/foundation → @core/contracts
+apps/web            → @grimoire/contracts
+packages/foundation → @grimoire/contracts
 services/identity   → contracts + foundation          (本域表 + 端口调用)
 services/content    → contracts + foundation
 services/community  → contracts + foundation + ArticleQueryPort(content 提供)

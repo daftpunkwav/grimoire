@@ -11,8 +11,8 @@ import 'dotenv/config';
 import { createApp } from './app.js';
 import { prisma } from './lib/prisma.js';
 import { validateEnv } from './lib/env.js';
-import { logger } from '@core/foundation';
-import { createLlmGateway } from '@core/llm';
+import { logger } from '@grimoire/foundation';
+import { createLlmGateway } from '@grimoire/llm';
 
 const port = Number(process.env.PORT || 8181);
 

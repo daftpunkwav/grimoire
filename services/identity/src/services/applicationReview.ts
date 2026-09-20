@@ -10,7 +10,7 @@
  * the same row at the same time; do not weaken it without restoring the alternative lock.
  */
 import type { PrismaClient } from '@prisma/client';
-import { badRequest, notFound } from '@core/foundation';
+import { badRequest, notFound } from '@grimoire/foundation';
 
 export async function applyApplicationDecision(
   prisma: PrismaClient,

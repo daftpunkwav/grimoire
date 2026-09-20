@@ -8,7 +8,7 @@
 | ID | 决策 | 理由 | 强制机制 |
 |---|---|---|---|
 | DR-001 | `packages/contracts` 是其他所有工作区的依赖根,不依赖任何业务包。 | 让公共 port 表面可发现;防止传递性依赖环。 | `pnpm boundaries`(拒绝任何非 contracts 包 import service)。 |
-| DR-002 | 组合根仅位于 `apps/api/src/compose.ts`。 | port 实现的装配只有一处;其余代码可以按 port 中的数据流推理。 | 代码审查 + `pnpm boundaries`(拒绝 `compose.ts` 出现在其他文件中)。 |
+| DR-002 | 组合根仅位于 `services/api/src/compose.ts`。 | port 实现的装配只有一处;其余代码可以按 port 中的数据流推理。 | 代码审查 + `pnpm boundaries`(拒绝 `compose.ts` 出现在其他文件中)。 |
 | DR-003 | `services/llm` 是唯一持有 provider 凭据的工作区。 | 尊重每用户 BYOK 隔离;限定密钥爆炸半径。 | `pnpm check:deps` + CI 密钥扫描。 |
 | DR-004 | hover sanitize 在 port 边界执行,绝不放在提示词模板内。 | 受信任边界可审计;放在模板内随提示词修改容易回退。 | `packages/contracts/src/hoverSanitize.test.ts` 钉住拒绝模式。 |
 | DR-005 | 前端仅依赖 `@grimoire/contracts` 与 `@grimoire/foundation`;所有服务端流量走 API client。 | 让前端构建更快,并让契约表面显式。 | `pnpm boundaries` + 前端 import 白名单。 |

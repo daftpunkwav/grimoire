@@ -11,18 +11,18 @@
  *
  * Split out of `routes/agent.ts` so the route layer stays a thin HTTP/SSE adapter.
  */
-import { logger } from '@core/foundation';
+import { logger } from '@grimoire/foundation';
 import {
   buildDeepSystem,
   buildHoverRetrySystem,
   buildHoverSystem,
   buildReactSystem,
 } from '../lib/agentPrompt.js';
-import { extractHoverAnswer, isSafeHoverPublicAnswer } from '@core/contracts';
+import { extractHoverAnswer, isSafeHoverPublicAnswer } from '@grimoire/contracts';
 import { HOVER_RETRY_TIMEOUT_MS } from '../lib/agentConstants.js';
-import { LLM_TOKEN_LIMITS } from '@core/contracts';
+import { LLM_TOKEN_LIMITS } from '@grimoire/contracts';
 import type { AgentDeps } from '../ports.js';
-import type { ProviderConfig } from '@core/contracts';
+import type { ProviderConfig } from '@grimoire/contracts';
 import type { AgentConversation } from './agentConversation.js';
 import type { HoverCache } from './hoverCache.js';
 import type { AgentMemory } from './agentMemory.js';

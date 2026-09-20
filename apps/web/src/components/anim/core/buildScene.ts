@@ -1,4 +1,4 @@
-import type { AnimationStep, AnimationTemplate } from '@core/contracts';
+import type { AnimationStep, AnimationTemplate } from '@grimoire/contracts';
 import type { SceneModel, VisualKind, VizEdge, VizFrame, VizNode } from './types';
 import { resolveVisualKind } from '../registry';
 

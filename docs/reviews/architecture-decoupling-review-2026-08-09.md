@@ -36,7 +36,7 @@ AgentForge 的**静态边界是干净的**：`apps/web` 与 `apps/api` 之间零
 以下设计**已经符合企业级要求**，改造时不要破坏：
 
 - **web↔api 零交叉依赖**；`packages/shared`（DTO / 权限矩阵 / hoverSanitize）为前后端单一真相。
-- **A-02**：`callLlm`/`streamLlm` 统一 30s 超时（`apps/api/src/lib/llm/providerHttp.ts:37` `withTimeout`）。
+- **A-02**：`callLlm`/`streamLlm` 统一 30s 超时（`services/api/src/lib/llm/providerHttp.ts:37` `withTimeout`）。
 - **B-05**：仅 5xx/网络错误重试一次，4xx/超时/主动取消不重试（`providerHttp.ts:17` `isRetriable`）。
 - **A-01**：上游错误诊断字段只进日志，客户端只见安全文案（`agentOrchestrator.ts:201` `llmError`）。
 - **I2/I3/I5**：客户端断开传播取消上游、流式 per-delta 门控、先持久化再 final。
@@ -444,7 +444,7 @@ export const router = createBrowserRouter([
 
 > 为什么放在 `lib/llm/` 而不是路由层：所有 LLM 出口都收敛在 `callLlm`/`streamLlm` 两个函数（悬停/对话/tool-loop/test-llm 都走这里），在这两个出口挂 R-01/R-02 即可**一次覆盖全部调用方**，无需改任何路由。
 
-#### 改动 1：新建 `apps/api/src/lib/llm/resilience.ts`
+#### 改动 1：新建 `services/api/src/lib/llm/resilience.ts`
 
 ```ts
 /**
@@ -634,7 +634,7 @@ export function llmSlotStats(): { inFlight: number; queued: number; max: number 
 }
 ```
 
-#### 改动 2：接入 `apps/api/src/lib/llm/providers.ts`
+#### 改动 2：接入 `services/api/src/lib/llm/providers.ts`
 
 **(a)** 顶部 import 区追加：
 
@@ -776,7 +776,7 @@ export async function* streamLlm(
 }
 ```
 
-#### 改动 3：新增测试 `apps/api/src/lib/llm/resilience.test.ts`
+#### 改动 3：新增测试 `services/api/src/lib/llm/resilience.test.ts`
 
 ```ts
 import { describe, expect, it, beforeEach } from 'vitest';
@@ -856,7 +856,7 @@ describe('R-02 bulkhead', () => {
 - `/health` 在 `generalLimiter`（`app.ts:67`）之后挂载：LB 高频探测会消耗 120/min 预算，**健康检查自己被 429 → LB 摘流 → 假性宕机**。
 - `/health` 是浅检查（`{ok:true}`）：进程活着但 DB 挂了也报健康，LB 无法区分「liveness」与「readiness」。
 
-#### 改动 1：整体替换 `apps/api/src/index.ts`
+#### 改动 1：整体替换 `services/api/src/index.ts`
 
 ```ts
 import 'dotenv/config';
@@ -911,7 +911,7 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 ```
 
-#### 改动 2：新建 `apps/api/src/lib/env.ts`（P1-4 提前说明，与 R-03 同批落地）
+#### 改动 2：新建 `services/api/src/lib/env.ts`（P1-4 提前说明，与 R-03 同批落地）
 
 ```ts
 /**
@@ -961,7 +961,7 @@ export function validateEnv(): void {
 
 > 注意：`validateEnv` 里调用了 `loadProviders()`，它会缓存结果（B-03 语义不变，只是提前到启动期读一次）。
 
-#### 改动 3：`apps/api/src/app.ts` 健康/就绪分离 + 移出限流
+#### 改动 3：`services/api/src/app.ts` 健康/就绪分离 + 移出限流
 
 现状（`app.ts:55-71`）：`generalLimiter` 在 `app.use` 之后、`/health` 在其后。
 
@@ -1018,7 +1018,7 @@ if (prep.isHover) {
 
 **问题 B：缓存读未隔离。** `getHoverCache`（`hoverCache.ts:30`）的 Prisma 异常会沿路由 try/catch 进 `next(e)` → 500。缓存是优化层不是关键路径：**读失败应视为 miss，降级走 LLM**。
 
-#### 改动 1：`apps/api/src/services/hoverCache.ts` 末尾追加
+#### 改动 1：`services/api/src/services/hoverCache.ts` 末尾追加
 
 ```ts
 /**
@@ -1037,7 +1037,7 @@ export async function getHoverCacheSafe(topic: string, style: string): Promise<s
 
 （`logger` 在该文件已 import，无需新增。）
 
-#### 改动 2：`apps/api/src/routes/agent.ts` `/explain`（现状 89-152 行）
+#### 改动 2：`services/api/src/routes/agent.ts` `/explain`（现状 89-152 行）
 
 把路由体前段：
 
@@ -1167,7 +1167,7 @@ export async function getHoverCacheSafe(topic: string, style: string): Promise<s
 - BYOK 失败**默认不**回落到服务端 Provider（避免用户配额预期外消耗服务端额度），用 env `LLM_BYOK_FALLBACK_TO_SERVER=1` 显式开启。
 - 响应 `providerId` 必须反映**实际服务者**——`callLlmWithFallback` 返回 `{ result, provider }`。
 
-#### 改动 1：`apps/api/src/lib/llm/providers.ts` 追加
+#### 改动 1：`services/api/src/lib/llm/providers.ts` 追加
 
 ```ts
 /**
@@ -1226,7 +1226,7 @@ export async function callLlmWithFallback(
 }
 ```
 
-#### 改动 2：`apps/api/src/services/agentOrchestrator.ts`
+#### 改动 2：`services/api/src/services/agentOrchestrator.ts`
 
 `runExplain`（230-276）与 `prepareChat`（140-186）中：
 
@@ -1243,7 +1243,7 @@ const provider = chain[0]; // 元信息/提示词路径仍用首选；调用走�
 
 返回值里**额外带上 `chain`**（`runExplain` 返回对象加 `chain`；`prepareChat` 同理）。`resolveProvider` 的 import 替换为 `resolveProviderChain`。
 
-#### 改动 3：`apps/api/src/routes/agent.ts` 调用点
+#### 改动 3：`services/api/src/routes/agent.ts` 调用点
 
 三处 `callLlm(...)`（`/explain` 约 113 行、`/chat` 约 398 行）与非 react 分支的 `streamLlm`（`/explain/stream` 244 行、`/chat/stream` 527 行）替换：
 
@@ -1279,7 +1279,7 @@ result = r;
 
 `runToolLoop`（`toolLoop.ts:69-141`）每轮 `callLlm` 各自 30s 超时 + 工具 8s，5 轮最坏 ≈190s。前端 tools 模式 90s 超时（`useAgentPanel.ts:207`）后断开，服务端却继续空跑烧 token。需要**循环级总时限**，默认 75s（< 前端 90s，留出发送 final 的余量）。
 
-#### 改动 1：`apps/api/src/lib/llm/config.ts` 追加
+#### 改动 1：`services/api/src/lib/llm/config.ts` 追加
 
 ```ts
 /** ReAct tool-loop 整体时限（R-08）：须小于前端 tools 模式超时 90s，留出 final 余量 */
@@ -1289,7 +1289,7 @@ export const TOOL_LOOP_OVERALL_MS = Math.max(
 );
 ```
 
-#### 改动 2：`apps/api/src/lib/llm/tools/toolLoop.ts`
+#### 改动 2：`services/api/src/lib/llm/tools/toolLoop.ts`
 
 `runToolLoop` 函数体（56 行起）做三处小改：
 
@@ -1340,7 +1340,7 @@ export const TOOL_LOOP_OVERALL_MS = Math.max(
 
 `initSse`（`sse.ts:7-13`）之后，deep 模式首 token 可能超过 60s（尤其 `openai_responses` 退化为整段调用，B-04）。Nginx 默认 `proxy_read_timeout 60s` 会切断「静默」连接——**用户看到的是流式中断，实际后端还在正常生成**。行业标准做法：每 15s 发一行 SSE 注释 `: ping`（前端 `agentStream.ts:92` 只认 `data:` 前缀，注释行天然被忽略，**契约零变化**）。
 
-#### 改动 1：`apps/api/src/lib/sse.ts` 追加
+#### 改动 1：`services/api/src/lib/sse.ts` 追加
 
 ```ts
 /**
@@ -1361,7 +1361,7 @@ export function startSseHeartbeat(res: Response, intervalMs = 15_000): () => voi
 }
 ```
 
-#### 改动 2：`apps/api/src/routes/agent.ts` 两个流式端点
+#### 改动 2：`services/api/src/routes/agent.ts` 两个流式端点
 
 `/explain/stream` 与 `/chat/stream` 中，`initSse(res);` 之后立即：
 
@@ -1383,7 +1383,7 @@ Nginx（或 `proxy_read_timeout 5s` 的本地反代）后访问 deep 流式讲�
 
 ### P1-4 启动期 env 校验（R-07）
 
-**已在 P0-5 改动 2 给出完整代码**（`apps/api/src/lib/env.ts`），此处只补原则：
+**已在 P0-5 改动 2 给出完整代码**（`services/api/src/lib/env.ts`），此处只补原则：
 
 | 依赖 | 级别 | 缺失行为 |
 |------|------|----------|
@@ -1407,7 +1407,7 @@ Nginx（或 `proxy_read_timeout 5s` 的本地反代）后访问 deep 流式讲�
 
 分桶原则：**高频低成本的悬停走宽桶，高频高成本的对话走窄桶，写操作走最窄桶**。
 
-#### 改动：`apps/api/src/app.ts`
+#### 改动：`services/api/src/app.ts`
 
 现状（`app.ts:73-77` + `app.ts:85`）：
 
@@ -1445,7 +1445,7 @@ Nginx（或 `proxy_read_timeout 5s` 的本地反代）后访问 deep 流式讲�
   app.use('/api/v1/agent', agentRouter);
 ```
 
-`apps/api/src/routes/agent.ts` 内按端点挂桶（顶部 import `rateLimit from 'express-rate-limit';`，桶定义移到该文件或从 app.ts 导出——**推荐移到 agent.ts**，保持 app.ts 只做装配）：
+`services/api/src/routes/agent.ts` 内按端点挂桶（顶部 import `rateLimit from 'express-rate-limit';`，桶定义移到该文件或从 app.ts 导出——**推荐移到 agent.ts**，保持 app.ts 只做装配）：
 
 ```ts
 agentRouter.post('/explain', agentHoverLimiter, optionalAuth, validate(explainSchemaFixed), ...);
@@ -1474,7 +1474,7 @@ agentRouter.post('/cache/clear', agentWriteLimiter, requireAuth, requireRole('ad
 
 `loadUserContext`（`agentMemory.ts:66-120`）每次执行 3 条 DB 查询 + BYOK 解密。悬停是**全站最高频端点**（每次悬停未命中 L1/L2 都走一遍），登录重度用户扫文时对 SQLite 形成稳定放大压力。而记忆/进度在 60s 内几乎不变——短 TTL 进程内缓存是标准解法。
 
-#### 改动：`apps/api/src/services/agentMemory.ts`
+#### 改动：`services/api/src/services/agentMemory.ts`
 
 ```ts
 /** R-11：hover 高频路径用户上下文短缓存（进程内，TTL 60s）；设置变更时主动失效 */

@@ -6,14 +6,14 @@
  * - optionalAuth: populate req.user if a valid Bearer token is present
  * - requireAuth: reject requests without a valid Bearer token
  * - requireRole(...roles): gate by role allow-list
- * - requirePermission(...perms): gate by permission allow-list (via @core/contracts.can)
+ * - requirePermission(...perms): gate by permission allow-list (via @grimoire/contracts.can)
  * - requireAdminLevel(min): gate by minimum adminLevel
  *
  * Augments Express's Request with an `AuthUser` typed `user` field.
  */
 import type { RequestHandler } from 'express';
-import type { AuthorTier, Permission, UserRole } from '@core/contracts';
-import { can } from '@core/contracts';
+import type { AuthorTier, Permission, UserRole } from '@grimoire/contracts';
+import { can } from '@grimoire/contracts';
 import { verifyAccessToken } from './jwt.js';
 import { forbidden, unauthorized } from './errors.js';
 

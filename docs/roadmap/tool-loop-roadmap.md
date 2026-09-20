@@ -1,7 +1,7 @@
 # 待办：Tool-loop 深化与 MCP
 
 > 状态：**P0 已完成；P1/P2 未实现**（2026-08-04）  
-> 相关：`docs/architecture/agent-modes.md` · `docs/architecture/security.md` · `apps/api/src/lib/llm/tools/` · `services/mcp/`
+> 相关：`docs/architecture/agent-modes.md` · `docs/architecture/security.md` · `services/api/src/lib/llm/tools/` · `services/mcp/`
 
 ## 当前（P0）
 

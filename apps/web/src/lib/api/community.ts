@@ -1,4 +1,4 @@
-import type { TopicSummary } from '@core/contracts';
+import type { TopicSummary } from '@grimoire/contracts';
 import { type PageResult, request } from './client.js';
 
 export const communityApi = {

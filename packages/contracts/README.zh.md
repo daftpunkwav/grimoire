@@ -50,6 +50,6 @@ Runtime:**无**。Dev:`vitest`、`oxlint`、`typescript`。
 - 新增 DTO 是 `dto.ts` 中的一行改动;同一 commit 中镜像到每个
   `serialize.ts` 与每个前端 client 文件。
 - 新增 port 需要在所属 service 中提供实现,并在同一 commit 中于
-  `apps/api/src/compose.ts` 注册。
+  `services/api/src/compose.ts` 注册。
 - 悬停净化规则**有意严格**;`hoverSanitize.test.ts` 中的测试钉住拒绝
   模式。放宽规则需配对的 ADR 条目。

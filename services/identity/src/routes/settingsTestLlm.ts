@@ -12,10 +12,10 @@
  */
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { requireAuth, parsePrefs, AppError } from '@core/foundation';
-import type { ByokConfig } from '@core/contracts';
+import { requireAuth, parsePrefs, AppError } from '@grimoire/foundation';
+import type { ByokConfig } from '@grimoire/contracts';
 import type { PrismaClient } from '@prisma/client';
-import type { LlmGatewayPort } from '@core/contracts';
+import type { LlmGatewayPort } from '@grimoire/contracts';
 
 export function mountSettingsTestLlmRoutes(
   router: Router,

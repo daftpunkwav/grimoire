@@ -6,6 +6,9 @@
  * - Expose the current locale and a setter through `useLocale` / `useSetLocale`
  * - Expose a translator `useT()` that returns `(key, params?) => string`
  * - Sync the active locale to `<html lang>` and the storage adapter
+ *
+ * Notes:
+ * - This file is `.tsx` because it returns JSX (`I18nContext.Provider`).
  */
 
 import {
@@ -18,9 +21,10 @@ import {
   type ReactNode,
 } from "react";
 import { resolveMessage, type MessageCatalog } from "./catalogs/types.js";
+import { type CatalogByLocale } from "./catalogs/index.js";
 import type { AppLocale } from "./locale.js";
 
-export type CatalogByLocale = Readonly<Record<AppLocale, MessageCatalog>>;
+export type { CatalogByLocale };
 
 export type StorageAdapter = {
   write: (locale: AppLocale) => void;

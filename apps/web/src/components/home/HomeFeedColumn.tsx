@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ArticleSummary } from '@core/contracts';
+import type { ArticleSummary } from '@grimoire/contracts';
 import { api } from '@/lib/api';
 import { ArticleCardInlineAgent } from '@/components/article/ArticleCardInlineAgent';
 import { HOME_FEED_LIMIT } from './homeDomains';

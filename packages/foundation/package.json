@@ -1,5 +1,5 @@
 {
-  "name": "@core/foundation",
+  "name": "@grimoire/foundation",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@core/contracts": "*",
+    "@grimoire/contracts": "*",
     "bcryptjs": "^3.0.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",

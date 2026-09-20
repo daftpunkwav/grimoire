@@ -1,4 +1,4 @@
-import type { AnimationDef, ArticleDetail, ArticleSummary } from '@core/contracts';
+import type { AnimationDef, ArticleDetail, ArticleSummary } from '@grimoire/contracts';
 import { type PageResult, request } from './client.js';
 
 export const articlesApi = {

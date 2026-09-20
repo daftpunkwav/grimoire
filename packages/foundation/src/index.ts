@@ -1,6 +1,6 @@
 /**
  * @file index
- * @description Public exports for the @core/foundation package.
+ * @description Public exports for the @grimoire/foundation package.
  *
  * Responsibilities:
  * - Re-export error types and constructors (AppError, badRequest, unauthorized, forbidden, notFound, conflict)

@@ -13,10 +13,10 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate, optionalAuth, requireAuth, requirePermission, badRequest, notFound, param } from '@core/foundation';
+import { validate, optionalAuth, requireAuth, requirePermission, badRequest, notFound, param } from '@grimoire/foundation';
 import type { PrismaClient } from '@prisma/client';
 import { toArticleSummary } from '../services/serialize.js';
-import type { UserSummaryPort as UserQueryPort } from '@core/contracts';
+import type { UserSummaryPort as UserQueryPort } from '@grimoire/contracts';
 
 const createSchema = z.object({
   name: z.string().min(1).max(80),

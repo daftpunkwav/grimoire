@@ -13,7 +13,7 @@ CI 在 `windows-latest` 上运行的七大门禁。每个门禁负责一件事;�
 | `pnpm -r typecheck` | (每工作区 `tsc --noEmit`) | 同上,无输出。 | 同上。 |
 | `pnpm typecheck:tests` | `tsc -p tsconfig.tests.json --noEmit` | 测试基于仓库 base 通过 typecheck。 | 测试引用了 runner 无法解析的路径。 |
 | `pnpm test:coverage` | `vitest run --coverage` | 单元测试通过且覆盖率阈值达标。 | 补测试,不是降低阈值(见 `vitest.config.ts`)。 |
-| `pnpm boundaries` | `scripts/check-boundaries.mjs` | import 方向:无跨 service 源码 import;仅 `apps/api/src/compose.ts` 可以 import 每个 service。 | 把违规 import 移到 port 后面,或移到组合根。 |
+| `pnpm boundaries` | `scripts/check-boundaries.mjs` | import 方向:无跨 service 源码 import;仅 `services/api/src/compose.ts` 可以 import 每个 service。 | 把违规 import 移到 port 后面,或移到组合根。 |
 | `pnpm check:deps` | `scripts/check-package-deps.mjs` | 声明 vs 实际 import;无 value / dynamic 环;仅在测试中用的 runtime 依赖 → 降级。 | 改 `package.json` 以匹配代码实际 import 的内容。 |
 | `pnpm check:exports` | `scripts/check-export-tests.mjs` | 每个可调用的公共导出都被测试引用(常量 / schemas / enums 忽略)。 | 给该导出加测试,或加入 `PENDING` 白名单(该列表只能缩减)。 |
 | `pnpm --filter @grimoire/web check:i18n` | `apps/web/scripts/check-i18n.mjs` | `en` 与 `zh-CN` 的 catalog key 对等;对 `src/app`、`src/components`、`src/i18n` 做 CJK 扫描(带白名单)。 | 补缺失翻译,或移除内联字符串。 |
@@ -31,7 +31,7 @@ CI 在 `windows-latest` 上运行的七大门禁。每个门禁负责一件事;�
 允许的例外列在脚本头部。
 
 **修复**:在 `@grimoire/contracts` 中引入 port,在所属 service 中实现,
-在 [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) 中注册,让消费方
+在 [`services/api/src/compose.ts`](../../services/api/src/compose.ts) 中注册,让消费方
 只 import port。
 
 ### `pnpm check:deps`

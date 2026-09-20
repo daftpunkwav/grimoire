@@ -5,7 +5,7 @@
  * Responsibilities:
  * - Pre-check ports 8180 (web) and 8181 (api) and refuse to start if either is in use
  * - Spawn `@grimoire/api` (dev) and `@grimoire/web` (dev) with env forwarding
- * - Install SIGINT / SIGTERM handlers with a graceful shutdown (3 s force-kill fallback)
+ * - Install SIGINT / SIGTERM handlers with a 3-second graceful window before SIGKILL
  * - Tear down the partner process if either child exits non-zero
  *
  * Usage:

@@ -1,5 +1,5 @@
 {
-  "name": "@core/community",
+  "name": "@grimoire/community",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,8 +11,8 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@core/contracts": "*",
-    "@core/foundation": "*",
+    "@grimoire/contracts": "*",
+    "@grimoire/foundation": "*",
     "@prisma/client": "^6.10.1",
     "express": "^5.1.0",
     "zod": "^3.25.67"

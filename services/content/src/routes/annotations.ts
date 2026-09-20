@@ -12,7 +12,7 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate, optionalAuth, requireAuth, requirePermission, badRequest, forbidden, notFound, param, attachUserRefs } from '@core/foundation';
+import { validate, optionalAuth, requireAuth, requirePermission, badRequest, forbidden, notFound, param, attachUserRefs } from '@grimoire/foundation';
 import type { PrismaClient, Annotation } from '@prisma/client';
 import { toAnnotationItem } from '../services/serialize.js';
 import {
@@ -21,7 +21,7 @@ import {
   resolveReviewBy,
 } from '../services/annotationAcl.js';
 import { applyAnnotationDecision } from '../services/annotationReview.js';
-import type { UserSummaryPort as UserQueryPort } from '@core/contracts';
+import type { UserSummaryPort as UserQueryPort } from '@grimoire/contracts';
 
 const createSchema = z
   .object({

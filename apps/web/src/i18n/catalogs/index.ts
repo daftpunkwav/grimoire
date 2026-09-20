@@ -24,5 +24,5 @@ export const CATALOGS = {
 
 export type CatalogByLocale = typeof CATALOGS;
 
-export type { MessageCatalog };
 export { zhCN, en };
+export type { MessageCatalog };

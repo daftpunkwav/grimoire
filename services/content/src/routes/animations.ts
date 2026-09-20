@@ -12,7 +12,7 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate, requireAuth, requireRole, optionalAuth, forbidden, notFound, param } from '@core/foundation';
+import { validate, requireAuth, requireRole, optionalAuth, forbidden, notFound, param } from '@grimoire/foundation';
 import type { PrismaClient } from '@prisma/client';
 import { toAnimationDef } from '../services/serialize.js';
 

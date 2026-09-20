@@ -12,8 +12,8 @@
  * Factory injects `PrismaClient`; only the agent-owned `HoverExplainCache` table is touched.
  */
 import { createHash } from 'node:crypto';
-import { logger } from '@core/foundation';
-import { isSafeHoverPublicAnswer } from '@core/contracts';
+import { logger } from '@grimoire/foundation';
+import { isSafeHoverPublicAnswer } from '@grimoire/contracts';
 
 const HOVER_CACHE_TTL_DEFAULT_MS = 2 * 60 * 60 * 1000;
 const HOVER_CACHE_TTL_HOT_MS = 24 * 60 * 60 * 1000;

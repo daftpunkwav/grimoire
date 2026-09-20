@@ -4,7 +4,7 @@
 
 Every HTTP route exposed by `services/api`. Routes are grouped by owning
 service; the composition root mounts them in
-[`apps/api/src/app.ts`](../../apps/api/src/app.ts).
+[`services/api/src/app.ts`](../../services/api/src/app.ts).
 
 Conventions:
 

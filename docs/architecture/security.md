@@ -1,11 +1,11 @@
 # 安全清单
 
-> 最后核对：2026-08-04（对照 `apps/api/src/` 与 `apps/web/src/`）
+> 最后核对：2026-08-04（对照 `services/api/src/` 与 `apps/web/src/`）
 
 ## 已实现
 
-- [x] 密码 bcrypt — `apps/api/src/lib/hash.ts`，cost 12
-- [x] JWT access + refresh 轮换 — `apps/api/src/lib/jwt.ts`：
+- [x] 密码 bcrypt — `services/api/src/lib/hash.ts`，cost 12
+- [x] JWT access + refresh 轮换 — `services/api/src/lib/jwt.ts`：
   - access：`JWT_ACCESS_EXPIRES_IN`（默认 `15m`；兼容旧 `JWT_EXPIRES_IN`）
   - refresh：`JWT_REFRESH_EXPIRES_IN`（默认 `7d`）；明文下发一次，DB 存 sha256（`RefreshToken`）；`POST /auth/refresh` 旋转吊销旧令牌；`POST /auth/logout` 吊销
   - 前端仍用 localStorage（`apiToken.ts`）；`api.ts` 遇 401 单次 refresh 后重试
@@ -36,7 +36,7 @@
 - [x] 同步/流式 LLM 调用超时（A-02）— 默认 30s `AbortSignal.timeout`；hover 兜底重试 12s
 - [x] MCP 探测占位 — `GET /api/v1/mcp/status` → `status: 'reserved'`（进程未实现）
 - [x] `SEED_ADMIN_PASSWORD` 必填（≥8 字符，无内置兜底）；已有用户不自动提权，需 `SEED_FORCE_ADMIN=1`
-- [x] tool-loop 安全护栏（P0）— 白名单工具名、Zod 参数校验、每工具 `AbortSignal.timeout(8s)`、`TOOL_LOOP_MAX_ITERS`（默认 5）、pino 审计（name/ok/ms，无密钥）；见 `apps/api/src/lib/llm/tools/`
+- [x] tool-loop 安全护栏（P0）— 白名单工具名、Zod 参数校验、每工具 `AbortSignal.timeout(8s)`、`TOOL_LOOP_MAX_ITERS`（默认 5）、pino 审计（name/ok/ms，无密钥）；见 `services/api/src/lib/llm/tools/`
 
 ## 未实现 / 待办
 

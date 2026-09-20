@@ -74,7 +74,7 @@ Full reference: [../../docs/reference/configuration.md](../../docs/reference/con
 ## Conventions
 
 - The composition root is the only file that imports from a service's
-  source. Every other consumer (including `apps/api/src/routes/*` if
+  source. Every other consumer (including `services/api/src/routes/*` if
   added) must import only from `@grimoire/contracts`.
 - Service startup order is fixed: `env → prisma → compose → listen →
   signal handlers`. The order is documented in

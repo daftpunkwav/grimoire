@@ -13,7 +13,7 @@
  */
 import { Router } from 'express';
 import { createTopicsRouter } from './routes/topics.js';
-import type { ArticleQueryPort, UserSummaryPort } from '@core/contracts';
+import type { ArticleQueryPort, UserSummaryPort } from '@grimoire/contracts';
 
 /** Community only consumes the user-summary subset. */
 export type UserQueryPort = UserSummaryPort;
@@ -34,4 +34,4 @@ export function createCommunityRouter(deps: CommunityDeps): Router {
   return Router().use(topics);
 }
 
-export type { ArticleQueryPort } from '@core/contracts';
+export type { ArticleQueryPort } from '@grimoire/contracts';

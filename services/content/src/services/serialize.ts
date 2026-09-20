@@ -1,6 +1,6 @@
 /**
  * @file services/serialize
- * @description DTO mappers from Prisma rows to the content `@core/contracts` wire shapes.
+ * @description DTO mappers from Prisma rows to the content `@grimoire/contracts` wire shapes.
  *
  * Responsibilities:
  * - `toAnimationDef`: parse the JSON-stringified `steps` and `config` columns into typed objects.
@@ -18,7 +18,7 @@ import type {
   AnimationDef as AnimDTO,
   AnnotationItem,
   UserSummary,
-} from '@core/contracts';
+} from '@grimoire/contracts';
 
 /** Author shape: cross-domain data comes from `UserQueryPort` (we don't bind to Prisma's `User` table). */
 type AuthorRef = UserSummary;

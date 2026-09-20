@@ -5,7 +5,7 @@
  * Responsibilities:
  * - Reject cross-service source imports (`@grimoire/<other-service>`) outside `services/api`
  * - Reject cross-domain Prisma model access (`prisma.<model>` / `tx.<model>`) outside the owning service
- * - Allow `apps/api/src/compose.ts` to import every service (the composition root)
+ * - Allow `services/api/src/compose.ts` to import every service (the composition root)
  * - Allow `apps/web` to import only `@grimoire/contracts` and `@grimoire/foundation`
  *
  * Rules:
@@ -14,7 +14,7 @@
  * - `services/<x>` may not import another service's source or its Prisma models.
  *
  * Notes:
- * - The composition root (`apps/api/src/compose.ts`) is exempted by walking its own dir
+ * - The composition root (`services/api/src/compose.ts`) is exempted by walking its own dir
  *   with an empty `forbid` list, so it is not scanned for boundary violations.
  * - Comments are stripped before matching, so doc-style references in JSDoc do not trip the gate.
  *
@@ -191,7 +191,7 @@ if (violations.length) {
   for (const v of violations) console.error("  ", v);
   console.error("");
   console.error("Fix: introduce a port in @grimoire/contracts, implement it in the owning");
-  console.error("service, register it in apps/api/src/compose.ts, and consume the port only.");
+  console.error("service, register it in services/api/src/compose.ts, and consume the port only.");
   process.exit(1);
 }
 

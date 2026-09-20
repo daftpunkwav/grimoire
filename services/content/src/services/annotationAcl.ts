@@ -13,8 +13,8 @@
  * - `resolveReviewBy` assumes the ACL has already admitted the caller; the `author` fallback is
  *   a safety net for callers that bypass the ACL.
  */
-import { can } from '@core/contracts';
-import type { AuthUser } from '@core/foundation';
+import { can } from '@grimoire/contracts';
+import type { AuthUser } from '@grimoire/foundation';
 
 /** List visibility: anonymous = approved only; logged-in = approved + their own; article author / admin = every row. */
 export function annotationListWhere(opts: {

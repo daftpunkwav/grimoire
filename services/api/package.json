@@ -1,5 +1,5 @@
 {
-  "name": "@core/api",
+  "name": "@grimoire/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,13 +16,13 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@core/contracts": "*",
-    "@core/foundation": "*",
-    "@core/llm": "*",
-    "@core/identity": "*",
-    "@core/content": "*",
-    "@core/community": "*",
-    "@core/agent": "*",
+    "@grimoire/contracts": "*",
+    "@grimoire/foundation": "*",
+    "@grimoire/llm": "*",
+    "@grimoire/identity": "*",
+    "@grimoire/content": "*",
+    "@grimoire/community": "*",
+    "@grimoire/agent": "*",
     "@prisma/client": "^6.10.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",

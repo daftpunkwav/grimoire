@@ -2,7 +2,7 @@
 
 > 语言：**简体中文** | [English](composition-root.md)
 
-`apps/api/src/compose.ts` 是仓库中**唯一** import 其他 service 源码的文件。
+`services/api/src/compose.ts` 是仓库中**唯一** import 其他 service 源码的文件。
 它也是唯一构造 port 实现并把它们装配进 HTTP host 的文件。
 
 ## 入口链
@@ -56,7 +56,7 @@
 1. 在 [`packages/contracts/src/ports.ts`](../../packages/contracts/src/ports.ts)
    中声明 port 接口。
 2. 在所属 service(例如 `services/<name>/src/<thing>.ts`)中实现。
-3. 在 [`apps/api/src/compose.ts`](../../apps/api/src/compose.ts) 对应的
+3. 在 [`services/api/src/compose.ts`](../../services/api/src/compose.ts) 对应的
    `compose()` 步骤中注册实现。
 4. 至少加一个测试覆盖消费该 port 的路由。CI 门禁 `pnpm check:exports`
    强制导出覆盖;`pnpm boundaries` 强制路由只 import port 表面。

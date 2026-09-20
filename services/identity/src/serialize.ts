@@ -8,7 +8,7 @@
  * Boundary: only the identity-owned `User` table is touched.
  */
 import type { User } from '@prisma/client';
-import type { PublicUser, AuthorTier, UserRole } from '@core/contracts';
+import type { PublicUser, AuthorTier, UserRole } from '@grimoire/contracts';
 
 export function toPublicUser(u: User): PublicUser {
   return {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { AnimationDef } from '@core/contracts';
+import type { AnimationDef } from '@grimoire/contracts';
 import {
   injectHeadingIds,
   renderMarkdown,

@@ -17,7 +17,7 @@ import {
   providerApiKey,
 } from './providers.js';
 import { resetCircuits } from './resilience.js';
-import { encryptByokKey } from '@core/foundation';
+import { encryptByokKey } from '@grimoire/foundation';
 
 const KEYS = [
   'STEPFUN_API_KEY',

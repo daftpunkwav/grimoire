@@ -11,9 +11,9 @@
  * The route layer keeps the loop skeleton, SSE write-back, and final-event assembly.
  * This module is independent of Express so it can be unit-tested without the router.
  */
-import type { StreamChunk } from '@core/contracts';
-import { extractHoverAnswer, isSafeHoverPublicAnswer, isSystemEcho } from '@core/contracts';
-import { logger } from '@core/foundation';
+import type { StreamChunk } from '@grimoire/contracts';
+import { extractHoverAnswer, isSafeHoverPublicAnswer, isSystemEcho } from '@grimoire/contracts';
+import { logger } from '@grimoire/foundation';
 
 export type StreamMode = 'hover' | 'fast' | 'deep';
 

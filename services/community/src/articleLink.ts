@@ -8,8 +8,8 @@
  * Invariant: bare `articleId` writes are forbidden — every id must round-trip through the article port
  * so the community service never trusts an FK without verifying it exists in the content domain.
  */
-import { badRequest } from '@core/foundation';
-import type { ArticleQueryPort } from '@core/contracts';
+import { badRequest } from '@grimoire/foundation';
+import type { ArticleQueryPort } from '@grimoire/contracts';
 
 export async function resolveLinkedArticleId(
   articles: Pick<ArticleQueryPort, 'getArticleIdBySlug' | 'getArticlesByIds'>,

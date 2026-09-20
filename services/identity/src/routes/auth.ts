@@ -14,12 +14,12 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { hashPassword, verifyPassword, generateRefreshToken, hashRefreshToken, refreshExpiresAt, signAccessToken } from '@core/foundation';
-import { badRequest, conflict, unauthorized } from '@core/foundation';
-import { validate, optionalAuth, requireAuth } from '@core/foundation';
+import { hashPassword, verifyPassword, generateRefreshToken, hashRefreshToken, refreshExpiresAt, signAccessToken } from '@grimoire/foundation';
+import { badRequest, conflict, unauthorized } from '@grimoire/foundation';
+import { validate, optionalAuth, requireAuth } from '@grimoire/foundation';
 import type { PrismaClient, User } from '@prisma/client';
 import { toPublicUser } from '../serialize.js';
-import type { AuthorTier, UserRole } from '@core/contracts';
+import type { AuthorTier, UserRole } from '@grimoire/contracts';
 
 const registerSchema = z.object({
   email: z.string().email('邮箱格式无效'),

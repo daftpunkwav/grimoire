@@ -10,9 +10,9 @@
  *
  * No native tools API is used here — the model is steered by a single-line `TOOL_CALL:` protocol.
  */
-import type { ApiFormat, ChatMessage, ProviderConfig } from '@core/contracts';
-import { logger } from '@core/foundation';
-import { extractVisibleAnswer } from '@core/foundation';
+import type { ApiFormat, ChatMessage, ProviderConfig } from '@grimoire/contracts';
+import { logger } from '@grimoire/foundation';
+import { extractVisibleAnswer } from '@grimoire/foundation';
 import { TOOL_LOOP_MAX_ITERS, TOOL_LOOP_OVERALL_MS, TOOL_TIMEOUT_MS } from '../agentConstants.js';
 import { parseToolCall } from './parseToolCall.js';
 import type { LlmGatewayPort } from '../../ports.js';

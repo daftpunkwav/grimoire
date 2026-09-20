@@ -17,7 +17,7 @@ the front-end lives in `apps/web/` and depends only on
 ## Rules
 
 - `apps/api/` is the composition root. All cross-service wiring lives in
-  `apps/api/src/compose.ts`. Other service files may only import from
+  `services/api/src/compose.ts`. Other service files may only import from
   `@grimoire/contracts` (the port interface), never from another service's
   source.
 - `apps/web/` depends only on `@grimoire/contracts` and `@grimoire/foundation`.

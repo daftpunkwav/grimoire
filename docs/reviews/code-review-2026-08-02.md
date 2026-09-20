@@ -54,14 +54,14 @@
 
 ### C-03 `/chat/stream` 缺少客户端断开时的上游 abort
 
-- **位置**:`apps/api/src/routes/agent.ts:753-864`(`/chat/stream`),对比 `agent.ts:558-562`(`/explain/stream` 有 `req.on('close', () => llmAbort.abort())`)
+- **位置**:`services/api/src/routes/agent.ts:753-864`(`/chat/stream`),对比 `agent.ts:558-562`(`/explain/stream` 有 `req.on('close', () => llmAbort.abort())`)
 - **问题**:`/explain/stream` 在客户端断开时通过 AbortController 取消上游 LLM;`/chat/stream` 只检查 `res.writableEnded` 后 `return`,**没有 abort 上游 fetch**。用户关页/断网后,上游继续生成到 maxTokens(deep 模式 2048)。
 - **影响**:token 成本与时间浪费;多人断线场景下 API 侧并发悬挂连接堆积。
 - **建议**:与 explain/stream 对齐,给 chat/stream 加 AbortController + `req.on('close')` 联动,并把 `signal` 传入 `streamLlm`。
 
 ### C-04 vite 代理端口与 API 默认端口不一致
 
-- **位置**:`apps/web/vite.config.ts:25`(`target: 'http://127.0.0.1:3002'`)vs `apps/api/src/index.ts:4`(`PORT || 3001`)vs `.env.example:2`(`PORT=3001`)
+- **位置**:`apps/web/vite.config.ts:25`(`target: 'http://127.0.0.1:3002'`)vs `services/api/src/index.ts:4`(`PORT || 3001`)vs `.env.example:2`(`PORT=3001`)
 - **问题**:仓库默认配置下(当前磁盘无 `.env`),dev 环境前端 `/api` 请求经代理打到 3002,API 实际监听 3001,全部落空;只有用户本地 `.env` 恰好设 `PORT=3002` 才一致——这是典型的"配置碎片化"陷阱,换机器必踩。
 - **影响**:新环境开箱即"接口全挂",排查成本高。
 - **建议**:统一为 3001(与 `.env.example` 一致),或代理改读环境变量;在 README 的 dev 启动说明中固定两者。
@@ -79,7 +79,7 @@
 
 ### M-01 前后端净化逻辑双份实现,已实际漂移
 
-- **位置**:`apps/web/src/lib/hoverExplainCache.ts`(约 200 行)vs `apps/api/src/lib/llm/agentPrompt.ts`
+- **位置**:`apps/web/src/lib/hoverExplainCache.ts`(约 200 行)vs `services/api/src/lib/llm/agentPrompt.ts`
 - **问题**:`SELF_REVISION / SELF_TALK_PHRASE / SYSTEM_ECHO / TASK_ECHO / PLANNING / isSelfTalkSentence / cleanDraftPart / stripSelfRevision / looksLikePlanning / isLikelyHoverTeaching` 等前后端各实现一份,注释自述"与后端对齐"但无机制保证。逐项对比已发现漂移:
   - 前端 `TASK_ECHO` 缺:`只写\s*2`、`请用\s*2`、`知识点[，,].{0,8}要`、`完整话[，,].*结尾`(后端有);
   - 前端 `SELF_REVISION` 多出:`讲核心|讲边界|讲接口|用户说|1\s*个类比|一个类比|要自然|没有多余`(后端无)。
@@ -88,21 +88,21 @@
 
 ### M-02 `trust proxy` 无条件信任
 
-- **位置**:`apps/api/src/app.ts:19`
+- **位置**:`services/api/src/app.ts:19`
 - **问题**:`app.set('trust proxy', 1)` 硬编码,未按部署形态配置。
 - **影响**:服务直接暴露(无反向代理)时,攻击者可伪造 `X-Forwarded-For` 头,令 express-rate-limit 的 IP 计数失准,**绕过限流**;误信代理链还会放大真实客户端 IP 解析问题。
 - **建议**:`app.set('trust proxy', process.env.TRUST_PROXY === '1')` 或按部署文档固定;反向代理场景应同时配置 `app.set('trust proxy', 1)` 的前置说明。
 
 ### M-03 `/agent/cache/clear` 无权限限制
 
-- **位置**:`apps/api/src/routes/agent.ts:355`(`requireAuth` 仅要求登录)
+- **位置**:`services/api/src/routes/agent.ts:355`(`requireAuth` 仅要求登录)
 - **问题**:任意注册用户可调用,`deleteMany({})` 清空全表悬停缓存。
 - **影响**:低成本成本攻击面——清空后全站重新打 LLM;且该接口同时影响所有用户(缓存是共享的)。
 - **建议**:限制为 `requireRole('admin')` 或至少加冷却 + 操作审计日志。
 
 ### M-04 匿名数据无清理策略
 
-- **位置**:`apps/api/src/routes/agent.ts:156-170`(`ensureConversation`)、`agent.ts:301-317`(`rememberTopic`)
+- **位置**:`services/api/src/routes/agent.ts:156-170`(`ensureConversation`)、`agent.ts:301-317`(`rememberTopic`)
 - **问题**:匿名用户每次 chat 都会新建 `agentConversation`(即使 401 级游客),`agentMessage` 随对话增长;`rememberTopic` 虽仅登录用户,但 `seen:` 记忆无条数上限之外的去重。
 - **影响**:SQLite 单文件库下,会话/消息表随使用无限膨胀,无 TTL、无清理任务。
 - **建议**:匿名会话加 TTL(如 7 天)或上限;`agentConversation` 加 `expiresAt` 列 + 定时清理脚本;`seen:` 记忆按 key 前缀截断。
@@ -137,21 +137,21 @@
 
 ### M-09 文章阅读量每次 GET 详情都 +1 且无防刷
 
-- **位置**:`apps/api/src/routes/articles.ts:144-149`
+- **位置**:`services/api/src/routes/articles.ts:144-149`
 - **问题**:`GET /articles/:slug` 即 `viewCount { increment: 1 }`,作者本人、频繁刷新、爬虫都计入;fire-and-forget 无失败处理。
 - **影响**:`popular` 排序(articles.ts:97-99)可被脚本刷榜;数据失真。
 - **建议**:按会话/IP/用户去重(如 24h 内同一用户只计一次),或改由前端事件(滚动到 50%)上报。
 
 ### M-10 删除领域两步操作非事务
 
-- **位置**:`apps/api/src/routes/domains.ts:203-204`
+- **位置**:`services/api/src/routes/domains.ts:203-204`
 - **问题**:先 `updateMany` 解绑文章再 `delete`,未包事务。
 - **影响**:中途失败留下"文章已解绑但领域仍存在"的中间态,且无重试机制。
 - **建议**:用 `prisma.$transaction` 包裹;或靠 schema 的 `onDelete: SetNull` 让级联自动处理,只做单条 delete。
 
 ### M-11 作者申请无并发唯一约束(TOCTOU)
 
-- **位置**:`apps/api/src/routes/applications.ts:36-41`;schema 无 `@@unique([userId, kind])`
+- **位置**:`services/api/src/routes/applications.ts:36-41`;schema 无 `@@unique([userId, kind])`
 - **问题**:pending 检查与 create 之间无约束兜底,并发双击可提交两份同类申请。
 - **影响**:审核端出现重复申请,审核流程(approve 一单另一单悬挂)状态混乱。
 - **建议**:schema 加 `@@unique([userId, kind])` + Prisma P2002 冲突映射(已有,errorHandler.ts:25-31)。
@@ -224,21 +224,21 @@
 
 ### L-05 topics 列表返回完整正文
 
-- **位置**:`apps/api/src/routes/topics.ts:46-52` + `services/serialize.ts:107-117`
+- **位置**:`services/api/src/routes/topics.ts:46-52` + `services/serialize.ts:107-117`
 - **问题**:列表接口直接返回最长 8000 字 `body`,前端只截取 160 字展示。
 - **影响**:带宽浪费;列表页打开即拉取全量正文。
 - **建议**:列表 DTO 截断或省略 body,详情接口再返回全文。
 
 ### L-06 validate.ts 残留 eslint-disable 注释
 
-- **位置**:`apps/api/src/middleware/validate.ts:15`(`// eslint-disable-next-line @typescript-eslint/no-explicit-any`)
+- **位置**:`services/api/src/middleware/validate.ts:15`(`// eslint-disable-next-line @typescript-eslint/no-explicit-any`)
 - **问题**:项目已用 oxlint,注释指向不存在的 lint 工具;`(req as any)` 也确有类型丢失。
 - **影响**:误导读者以为有 eslint;类型保护缺失。
 - **建议**:删除注释;用 module augmentation 扩展 Request 类型替代 `any`。
 
 ### L-07 slugify 兜底用 `Date.now()`
 
-- **位置**:`apps/api/src/services/serialize.ts:120-130`
+- **位置**:`services/api/src/services/serialize.ts:120-130`
 - **问题**:slug 冲突时兜底 `Date.now()` 生成后缀,同一毫秒重复保存产生相同 slug(第二次撞唯一约束),且语义不可读。
 - **影响**:偶发 409;URL 无意义。
 - **建议**:用随机短串(如 `crypto.randomBytes(3).toString('hex')`)或递增计数器。
@@ -285,7 +285,7 @@
 
 ### G-01 前后端缓存 key 语义割裂
 
-- **位置**:`apps/web/src/lib/hoverExplainCache.ts:239-241`(明文 `style::topic`)vs `apps/api/src/routes/agent.ts:69-73`(sha256 `v7::style::norm`)
+- **位置**:`apps/web/src/lib/hoverExplainCache.ts:239-241`(明文 `style::topic`)vs `services/api/src/routes/agent.ts:69-73`(sha256 `v7::style::norm`)
 - **问题**:同是 hover 缓存 key,两端实现不同(有意为之),且版本号 `v7` 硬编码在注释/字符串里,升级需手动改。
 - **影响**:两端 key 无法互查;缓存规则升级历史全在注释里。
 - **建议**:版本号常量提取;注释补充 v1~v7 演进表,便于下次升级。

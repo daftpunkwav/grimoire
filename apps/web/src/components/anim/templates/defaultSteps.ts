@@ -1,4 +1,4 @@
-import type { AnimationStep, AnimationTemplate } from '@core/contracts';
+import type { AnimationStep, AnimationTemplate } from '@grimoire/contracts';
 
 /**
  * 默认步骤语义：

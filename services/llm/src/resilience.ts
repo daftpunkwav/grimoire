@@ -11,7 +11,7 @@
  *
  * No provider knowledge lives here — only breaker and bulkhead mechanics.
  */
-import { logger } from '@core/foundation';
+import { logger } from '@grimoire/foundation';
 import { LlmCallError, isAbortError, isRetriable } from './providerHttp.js';
 
 type CircuitState = 'closed' | 'open' | 'half_open';

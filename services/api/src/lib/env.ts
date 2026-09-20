@@ -7,7 +7,7 @@
  * - Warn (do not block) when no server-side LLM providers are configured — the agent domain degrades to "BYOK only" while other domains stay healthy.
  * - Detect LLM availability through the injected `hasServerProviders` port semantic so `env.ts` does not import `llm` internals.
  */
-import { logger } from '@core/foundation';
+import { logger } from '@grimoire/foundation';
 
 export function validateEnv(opts: { hasServerProviders?: () => boolean } = {}): void {
   const problems: string[] = [];

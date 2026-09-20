@@ -17,7 +17,7 @@ import { createArticlesRouter } from './routes/articles.js';
 import { createAnimationsRouter } from './routes/animations.js';
 import { createDomainsRouter } from './routes/domains.js';
 import { createAnnotationsRouter } from './routes/annotations.js';
-import type { UserSummaryPort } from '@core/contracts';
+import type { UserSummaryPort } from '@grimoire/contracts';
 
 /** Content only consumes the user-summary subset (narrowed from contracts' `UserQueryPort`). */
 export type UserQueryPort = UserSummaryPort;

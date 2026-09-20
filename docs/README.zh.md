@@ -26,6 +26,7 @@ Grimoire monorepo 的文档。英文文档为规范;每页都以 `.zh.md` 后缀
 | [`architecture/animation-system.md`](architecture/animation-system.md) | 动画运行时:VisualKind × 模板映射;步骤参数化编辑(非自由画布)。 |
 | [`architecture/identity-permissions.md`](architecture/identity-permissions.md) | 身份、RBAC、角色模型(`guest / reader / author / admin`)、`adminLevel` 分级。 |
 | [`architecture/security.md`](architecture/security.md) | 已实现 / 待办的安全清单;交叉引用 [../SECURITY.md](../SECURITY.md)。 |
+| [`architecture/modular-monolith-microservices-review-2026-08-19.md`](architecture/modular-monolith-microservices-review-2026-08-19.md) | 架构决策审查:保持模块化单体形态,记录拆分标准。 |
 
 ### 指南 — `guides/`
 

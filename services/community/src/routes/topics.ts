@@ -14,10 +14,10 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate, optionalAuth, requireAuth, requirePermission, forbidden, notFound, param } from '@core/foundation';
+import { validate, optionalAuth, requireAuth, requirePermission, forbidden, notFound, param } from '@grimoire/foundation';
 import type { PrismaClient } from '@prisma/client';
-import type { ArticleQueryPort } from '@core/contracts';
-import type { UserSummaryPort as UserQueryPort } from '@core/contracts';
+import type { ArticleQueryPort } from '@grimoire/contracts';
+import type { UserSummaryPort as UserQueryPort } from '@grimoire/contracts';
 import { attachTopicRefs, toTopicSummary } from '../serialize.js';
 import { resolveLinkedArticleId } from '../articleLink.js';
 

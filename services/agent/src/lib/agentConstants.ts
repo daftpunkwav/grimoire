@@ -6,7 +6,7 @@
  * - Define the hover-retry short timeout (secondary path, must not match the main request's budget).
  * - Define the ReAct tool-loop max iteration count and per-tool timeout.
  * - Define the ReAct tool-loop overall deadline (R-08), kept below the front-end 90s tools-mode timeout.
- * - Re-export `LLM_TOKEN_LIMITS` is intentionally NOT here — that contract lives in `@core/contracts`.
+ * - Re-export `LLM_TOKEN_LIMITS` is intentionally NOT here — that contract lives in `@grimoire/contracts`.
  *
  * No runtime logic; constants only.
  */

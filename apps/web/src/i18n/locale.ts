@@ -4,7 +4,7 @@
  *
  * Responsibilities:
  * - Declare the supported locales (`zh-CN`, `en`) and their aliases
- * - Normalize any incoming locale string to a supported one
+ * - Normalize any incoming locale string (case- and underscore-insensitive) to a supported one
  * - Pick a default locale for first-time visitors
  *
  * Notes:
@@ -20,9 +20,12 @@ export const DEFAULT_LOCALE: AppLocale = "zh-CN";
 const ALIASES: Record<string, AppLocale> = {
   zh: "zh-CN",
   "zh-Hans": "zh-CN",
+  "zh-CN": "zh-CN",
   "zh_CN": "zh-CN",
+  "en": "en",
   "en-US": "en",
   "en-GB": "en",
+  "en_US": "en",
 };
 
 const ENDONYMS: Record<AppLocale, string> = {
@@ -34,23 +37,24 @@ const ENDONYMS: Record<AppLocale, string> = {
  * Normalize an incoming locale string (e.g. from a cookie, header, or storage)
  * to a supported `AppLocale`. Falls back to `DEFAULT_LOCALE` if the input is
  * unrecognizable.
+ *
+ * Normalization rules:
+ * - Lowercases the input
+ * - Converts underscores to hyphens
+ * - Looks up the normalized string in `ALIASES`, then falls back to the
+ *   language-part (before any `-` / `_`)
  */
 export function normalizeLocale(input: string | null | undefined): AppLocale {
   if (!input) return DEFAULT_LOCALE;
-  const trimmed = input.trim();
-  if ((SUPPORTED_LOCALES as readonly string[]).includes(trimmed)) {
-    return trimmed as AppLocale;
+  const normalized = input.trim().toLowerCase().replace(/_/g, "-");
+  if (normalized in ALIASES) return ALIASES[normalized];
+  const base = normalized.split(/[-_]/, 1)[0];
+  if (base in ALIASES) return ALIASES[base];
+  if ((SUPPORTED_LOCALES as readonly string[]).includes(normalized)) {
+    return normalized as AppLocale;
   }
-  const aliased = ALIASES[trimmed];
-  if (aliased) return aliased;
-  const dashIndex = trimmed.indexOf("-");
-  if (dashIndex > 0) {
-    const base = trimmed.slice(0, dashIndex);
-    const baseAliased = ALIASES[base];
-    if (baseAliased) return baseAliased;
-    if ((SUPPORTED_LOCALES as readonly string[]).includes(base)) {
-      return base as AppLocale;
-    }
+  if ((SUPPORTED_LOCALES as readonly string[]).includes(base)) {
+    return base as AppLocale;
   }
   return DEFAULT_LOCALE;
 }

@@ -12,8 +12,8 @@
  * internal call sites do not change.
  */
 import type { PrismaClient } from '@prisma/client';
-import { parsePrefs } from '@core/foundation';
-import type { ByokConfig, UserQueryPort } from '@core/contracts';
+import { parsePrefs } from '@grimoire/foundation';
+import type { ByokConfig, UserQueryPort } from '@grimoire/contracts';
 
 /** Batched user summaries used by content/community serializers when attaching authors. */
 export async function getUserSummaries(

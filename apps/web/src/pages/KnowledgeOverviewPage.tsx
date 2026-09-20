@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { DomainSummary } from '@core/contracts';
+import type { DomainSummary } from '@grimoire/contracts';
 import { api } from '@/lib/api';
 import { DomainSection } from '@/components/domain/DomainSection';
 

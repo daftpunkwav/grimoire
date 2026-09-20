@@ -20,7 +20,7 @@ import {
   requireAuth,
   requireRole,
   badRequest,
-} from '@core/foundation';
+} from '@grimoire/foundation';
 import { upsertLearningProgress } from '../services/learningProgress.js';
 import { AGENT_MODE_META } from '../lib/agentPrompt.js';
 import { mountExplainRoutes } from './explain.js';

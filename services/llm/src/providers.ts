@@ -20,8 +20,8 @@ import type {
   StreamChunk,
 } from './types.js';
 import { LLM_RETRY_BACKOFF_MS } from './config.js';
-import { logger } from '@core/foundation';
-import { assertSafeByokBaseUrl, decryptByokConfig } from '@core/foundation';
+import { logger } from '@grimoire/foundation';
+import { assertSafeByokBaseUrl, decryptByokConfig } from '@grimoire/foundation';
 import {
   LlmCallError,
   isAbortError,

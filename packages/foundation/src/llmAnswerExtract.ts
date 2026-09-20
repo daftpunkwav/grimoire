@@ -9,7 +9,7 @@
  * Cross-service pure function: consumed by both services/llm (adapters) and services/agent (tool-loop).
  * Lives in foundation to eliminate cross-service source dependencies.
  */
-import { isSystemEcho, looksLikeHoverPlanning } from '@core/contracts';
+import { isSystemEcho, looksLikeHoverPlanning } from '@grimoire/contracts';
 
 /**
  * Split "thinking draft + body" into the user-visible answer.

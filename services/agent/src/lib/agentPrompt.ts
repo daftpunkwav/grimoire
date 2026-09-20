@@ -12,7 +12,7 @@
  *
  * Prompt strings remain Chinese because the model is steered in Chinese; this module owns wording, not policy.
  */
-import type { AgentStyle } from '@core/contracts';
+import type { AgentStyle } from '@grimoire/contracts';
 
 const STYLE_PROMPTS: Record<AgentStyle, string> = {
   professional:

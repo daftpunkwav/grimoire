@@ -1,7 +1,7 @@
 # AgentForge Agent 核心审查报告（2026-08-03）
 
 > 审查日期：2026-08-03
-> 审查范围：**Agent 核心**——后端 `apps/api/src/lib/llm/*`、`apps/api/src/routes/agent.ts`、`apps/api/src/middleware/*`、`apps/api/src/app.ts`、前端 `apps/web/src/components/agent/*`、`apps/web/src/lib/agentStream.ts`、`apps/web/src/lib/hoverExplainCache.ts`、`apps/web/src/lib/markdown.ts`、`packages/shared/src/*`、`apps/api/prisma/schema.prisma`（Agent 相关模型）
+> 审查范围：**Agent 核心**——后端 `services/api/src/lib/llm/*`、`services/api/src/routes/agent.ts`、`services/api/src/middleware/*`、`services/api/src/app.ts`、前端 `apps/web/src/components/agent/*`、`apps/web/src/lib/agentStream.ts`、`apps/web/src/lib/hoverExplainCache.ts`、`apps/web/src/lib/markdown.ts`、`packages/shared/src/*`、`apps/api/prisma/schema.prisma`（Agent 相关模型）
 > 方法：逐文件静态阅读，未运行/修改任何代码
 > 行号基准：master 分支 `67d2079`
 > 严重度：🔴 严重（安全/正确性）｜🟠 高（可靠性/可维护性）｜🟡 中（代码气味）｜🟢 低（建议性）
@@ -32,7 +32,7 @@
 
 ### A-01 LLM 错误信息回显上游 URL，泄漏内部部署
 
-- **位置**：`apps/api/src/lib/llm/providers.ts:519`、`:591`、`:623`、`:265`、`:392`
+- **位置**：`services/api/src/lib/llm/providers.ts:519`、`:591`、`:623`、`:265`、`:392`
   ```ts
   throw new Error(`LLM 调用失败 (${res.status}) @ ${url}: ${msg}`);
   throw new Error(`LLM 流式失败 (${res.status}) @ ${url}: ${raw.slice(0, 240)}`);
@@ -79,7 +79,7 @@
 
 ### A-02 同步 LLM 调用无超时，上游挂起将拖垮连接
 
-- **位置**：`apps/api/src/lib/llm/providers.ts` 全部 `fetch` 调用（`:213`、`:237`、`:380`、`:485`、`:568`、`:601`）
+- **位置**：`services/api/src/lib/llm/providers.ts` 全部 `fetch` 调用（`:213`、`:237`、`:380`、`:485`、`:568`、`:601`）
 - **问题**：
   - 流式接口（`/explain/stream`、`/chat/stream`）的 `req.signal` 会传入 `streamLlm`，客户端断开时可取消上游；但 `callLlm`（同步 `/explain`、`/chat`、`/settings/test-llm`、hover retry）**完全不传 signal**，`fetch` 无任何超时。
   - 上游 LLM 网关慢响应或挂起（如 StepFun 排队、网关 504 长挂）时，Express 连接将无限期占用，直到上游自行断开或 Express 默认 socket timeout。
@@ -108,7 +108,7 @@
 
 ### A-03 BYOK apiKey 明文存于数据库 preferences JSON
 
-- **位置**：`apps/api/src/routes/settings.ts:108-124`（`preferences.byok.apiKey` 明文写入 `User.preferences` JSON 字符串）；`schema.prisma:28`（`preferences String @default("{}")`）
+- **位置**：`services/api/src/routes/settings.ts:108-124`（`preferences.byok.apiKey` 明文写入 `User.preferences` JSON 字符串）；`schema.prisma:28`（`preferences String @default("{}")`）
 - **问题**：用户的 BYOK `apiKey` 以明文存储在 SQLite 的 `preferences` 列中。`listPublicProviders` / `publicByok` 已做脱敏返回，但**存储层未加密**。
 - **影响**：
   1. 数据库文件（`apps/api/prisma/dev.db`）泄漏即泄漏所有用户的第三方 LLM API Key；
@@ -122,7 +122,7 @@
 
 ### A-04 面板 `/chat` 与 `/chat/stream` 缺少悬停那样的「安全质检」，深度讲解可能回显思考/规则
 
-- **位置**：`apps/api/src/routes/agent.ts:767`、`:889`（chat 同步与流式均用 `extractVisibleAnswer`）；`apps/api/src/lib/llm/agentPrompt.ts:97-136`（`extractVisibleAnswer`）
+- **位置**：`services/api/src/routes/agent.ts:767`、`:889`（chat 同步与流式均用 `extractVisibleAnswer`）；`services/api/src/lib/llm/agentPrompt.ts:97-136`（`extractVisibleAnswer`）
 - **问题**：
   - 悬停路径有 `extractHoverAnswer` + `isSafeHoverPublicAnswer` + retry 三重门控；但 **deep/chat 路径只调用 `extractVisibleAnswer`**，后者仅做「从 thinking 切出正文」的启发式拆分，**不做安全/完整性质检**。
   - `buildDeepSystem`（`agentPrompt.ts:69-91`）的 system prompt 含「禁止输出写作计划…」「### Thought」等格式指令；若模型把 system 规则复述进正文，`extractVisibleAnswer` 的 `PLANNING_HINT_LOCAL` 正则（`:139-140`）会尝试剥离，但其逻辑是「正文已有 Thought 标题或 >40 字就优先正文」，对「正文本身就复述了规则」的情况不拦截。
@@ -136,7 +136,7 @@
 
 ### A-05 测试覆盖仅悬停净化，LLM Provider / 路由 / 缓存零测试
 
-- **位置**：`apps/api/src/lib/llm/agentPrompt.hover.test.ts`（仅 11 例，全为净化函数）；`vitest.config.ts`
+- **位置**：`services/api/src/lib/llm/agentPrompt.hover.test.ts`（仅 11 例，全为净化函数）；`vitest.config.ts`
 - **问题**：当前唯一测试文件只覆盖 `extractHoverAnswer` 等纯函数。Agent 核心最易出错的部分——`providers.ts` 的三种格式解析、URL 解析、`resolveProvider` 分支、`agent.ts` 的缓存命中/过期/质检删除、`ensureConversation` 访问控制、SSE 早停——**无任何自动化覆盖**。
 - **影响**：上一轮 C-01 已引入 vitest，但覆盖面太窄；任何对 `providers.ts` 的改动（如本报告 A-01/A-02 的改造）无回归保护。
 - **修改建议**：补齐以下测试（均可用 vitest，无需真实 LLM——用 `vi.spyOn(global, 'fetch')` mock）：
@@ -164,7 +164,7 @@
 
 ### B-02 hover/chat 同步与流式逻辑四份重复
 
-- **位置**：`apps/api/src/routes/agent.ts`
+- **位置**：`services/api/src/routes/agent.ts`
   - `/explain`（`:477-540`）与 `/explain/stream`（`:542-713`）的 `runExplain` + 缓存查询 + LLM 调用 + retry + `rememberTopic` 逻辑重复；
   - `/chat`（`:715-788`）与 `/chat/stream`（`:790-918`）的 system 组装 + history + `persistTurn` + `rememberTopic` + `maybeSaveImportantMemory` 重复。
 - **问题**：四个 handler 各自拼装相同上下文，行为容易漂移（如 `/explain` 同步路径有 `retryHoverExplain` 但无早停；流式路径有早停 + retry）。
@@ -175,7 +175,7 @@
 
 ### B-03 `loadProviders()` 每次调用重新读环境变量，无缓存
 
-- **位置**：`apps/api/src/lib/llm/providers.ts:50-93`
+- **位置**：`services/api/src/lib/llm/providers.ts:50-93`
 - **问题**：`loadProviders()` 每次都 `process.env` 读取 + 构造数组 + filter。`getDefaultProvider()`、`listPublicProviders()`、`resolveProvider()` 都调用它，每次请求至少 1-2 次。
 - **影响**：性能损耗小但无谓；更重要的是**环境变量热更新语义不明**（当前每次读最新值，但生产不会热更）。
 - **修改建议**：模块级缓存，进程启动时加载一次：
@@ -192,7 +192,7 @@
 
 ### B-04 `streamLlm` 对 `openai_responses` 格式名不副实
 
-- **位置**：`apps/api/src/lib/llm/providers.ts:180-182`
+- **位置**：`services/api/src/lib/llm/providers.ts:180-182`
   ```ts
   const full = await callOpenAiResponses(p, req);
   if (full.text) yield { kind: 'text' as const, text: full.text };
@@ -232,7 +232,7 @@
 
 ### B-07 `ensureConversation` 每次建会话都触发全表清理扫描
 
-- **位置**：`apps/api/src/routes/agent.ts:167-171`
+- **位置**：`services/api/src/routes/agent.ts:167-171`
   ```ts
   void purgeExpiredGuestConversations().catch(...)
   ```
@@ -257,7 +257,7 @@
 
 ### B-08 `maybeSaveImportantMemory` 启发式过于简陋且无去重上限
 
-- **位置**：`apps/api/src/routes/agent.ts:242-262`
+- **位置**：`services/api/src/routes/agent.ts:242-262`
   ```ts
   if (/请记住|记住：|我的偏好|以后.*用/.test(userMsg)) {
     const key = `pref:${userMsg.slice(0, 40)}`;
@@ -276,7 +276,7 @@
 
 ### B-09 `loadRecentMessages` 取 12 条但无 token 预算控制
 
-- **位置**：`apps/api/src/routes/agent.ts:194-200`、`:725-729`、`:800-804`
+- **位置**：`services/api/src/routes/agent.ts:194-200`、`:725-729`、`:800-804`
   ```ts
   const recent = await loadRecentMessages(conv.id); // take 12
   const historyBlock = recent.reverse().map((m) => `${m.role}: ${m.content.slice(0, 400)}`).join('\n');
@@ -289,7 +289,7 @@
 
 ### B-10 SSE 错误处理路径中 `res.end()` 可能重复调用
 
-- **位置**：`apps/api/src/routes/agent.ts:708`、`:914`
+- **位置**：`services/api/src/routes/agent.ts:708`、`:914`
   ```ts
   } catch (e) { ... sseWrite(res, { type: 'error', ... }); }
   res.end();  // 可能 res.writableEnded 已 true
@@ -326,7 +326,7 @@
 
 ### C-02 `agent.ts` 单文件 1024 行，路由 + 业务逻辑 + 缓存 + SSE 混杂
 
-- **位置**：`apps/api/src/routes/agent.ts`
+- **位置**：`services/api/src/routes/agent.ts`
 - **问题**：路由定义、缓存逻辑（`getHoverCache/setHoverCache`）、会话管理（`ensureConversation/persistTurn`）、记忆（`loadUserContext/rememberTopic/maybeSaveImportantMemory`）、SSE 工具（`initSse/sseWrite`）、LLM 调用编排全部在一个文件。
 - **修改建议**：拆分为：
   - `routes/agent.ts`：仅路由定义与 handler 骨架
@@ -359,7 +359,7 @@
 
 ### C-04 `extractVisibleAnswer` 的 `PLANNING_HINT_LOCAL` 与 shared 重复
 
-- **位置**：`apps/api/src/lib/llm/agentPrompt.ts:139-140`
+- **位置**：`services/api/src/lib/llm/agentPrompt.ts:139-140`
   ```ts
   const PLANNING_HINT_LOCAL = /(?:^|[。！？\n])我需要[:：]|...|判断用户/;
   ```

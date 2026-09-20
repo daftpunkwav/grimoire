@@ -21,7 +21,7 @@
 
 - service 仅依赖 `@grimoire/contracts` 与 `@grimoire/foundation`。禁止跨
   service 源码 import,由 `scripts/check-boundaries.mjs` 门禁强制。
-- service 暴露的每个 port 实现在 `apps/api/src/compose.ts` 注册。组合根是
+- service 暴露的每个 port 实现在 `services/api/src/compose.ts` 注册。组合根是
   唯一 import service 内部的位置。
 - 每个 service 自带 `routes/`、`services/`、`lib/`、`tests/`。routes 是
   Express 5 处理器;services 是应用层用例;lib 存放该 service 内部的框架

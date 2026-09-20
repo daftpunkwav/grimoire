@@ -7,17 +7,17 @@
  * - Inject services following the dependency graph and return the `prefix → Router` mount table for the host app.
  * - Serve as the single migration point for future microservice extraction (swap same-process port delegates for HTTP clients; each service then listens on its own port).
  *
- * Port contract types converge on `@core/contracts`, so `usersPort` (provided by identity) naturally satisfies the `UserSummaryPort` subset consumed by content / community without forced casts.
+ * Port contract types converge on `@grimoire/contracts`, so `usersPort` (provided by identity) naturally satisfies the `UserSummaryPort` subset consumed by content / community without forced casts.
  */
 import type { Router } from 'express';
 import type { PrismaClient } from '@prisma/client';
-import type { LlmGateway } from '@core/llm';
-import type { UserQueryPort } from '@core/contracts';
-import { createIdentityRouters } from '@core/identity';
-import { createIdentityRepository } from '@core/identity';
-import { createContentRouters, createContentRepository } from '@core/content';
-import { createCommunityRouters } from '@core/community';
-import { createAgentRuntime, createAgentRouter } from '@core/agent';
+import type { LlmGateway } from '@grimoire/llm';
+import type { UserQueryPort } from '@grimoire/contracts';
+import { createIdentityRouters } from '@grimoire/identity';
+import { createIdentityRepository } from '@grimoire/identity';
+import { createContentRouters, createContentRepository } from '@grimoire/content';
+import { createCommunityRouters } from '@grimoire/community';
+import { createAgentRuntime, createAgentRouter } from '@grimoire/agent';
 
 export interface ComposeResult {
   /** Routers assembled in dependency order, mounted by the host app. */

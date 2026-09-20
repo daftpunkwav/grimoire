@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { AnimationDef } from '@core/contracts';
+import type { AnimationDef } from '@grimoire/contracts';
 import { useAnimationPlayer } from '@/hooks/useAnimationPlayer';
 import { AnimationControls } from './AnimationControls';
 import { resolveDefaultSteps } from './registry';

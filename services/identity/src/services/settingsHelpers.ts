@@ -10,9 +10,9 @@
  * Invariant: API keys never leave this module in plaintext; the gateway owns masking and decryption.
  */
 import { z } from 'zod';
-import { decryptByokConfig } from '@core/foundation';
-import type { ByokConfig } from '@core/contracts';
-import type { LlmGatewayPort } from '@core/contracts';
+import { decryptByokConfig } from '@grimoire/foundation';
+import type { ByokConfig } from '@grimoire/contracts';
+import type { LlmGatewayPort } from '@grimoire/contracts';
 
 export const AGENT_STYLES = ['professional', 'friendly', 'sassy', 'concise', 'socratic'] as const;
 

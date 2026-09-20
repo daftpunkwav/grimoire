@@ -5,7 +5,7 @@
  * Responsibilities:
  * - Re-export provider-list and provider-resolution helpers (`resolveProvider`, `resolveProviderChain`, `getDefaultProvider`, `listPublicProviders`, `maskApiKey`).
  * - Re-export call/stream entry points (`callLlm`, `callLlmWithFallback`, `streamLlm`, `resolveStreamWithFallback`).
- * - Re-export `LlmCallError`, the cache reset/load helpers, and the shared types from `@core/contracts`.
+ * - Re-export `LlmCallError`, the cache reset/load helpers, and the shared types from `@grimoire/contracts`.
  * - Provide `createLlmGateway()` which returns an object shaped to fit the agent/identity port.
  *
  * This service holds every LLM key (env providers and decrypted BYOK plaintext); keys are decrypted only inside this service.
@@ -62,4 +62,4 @@ export function createLlmGateway() {
 export type LlmGateway = ReturnType<typeof createLlmGateway>;
 export { LlmCallError } from './providerHttp.js';
 export { resetProviderCache, loadProviders } from './providers.js';
-export type { LlmRequest, LlmResponse, ProviderConfig, StreamChunk } from '@core/contracts';
+export type { LlmRequest, LlmResponse, ProviderConfig, StreamChunk } from '@grimoire/contracts';

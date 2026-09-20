@@ -13,10 +13,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { randomUUID } from 'node:crypto';
-import { logger, errorHandler } from '@core/foundation';
+import { logger, errorHandler } from '@grimoire/foundation';
 import { compose } from './compose.js';
 import type { PrismaClient } from '@prisma/client';
-import type { LlmGateway } from '@core/llm';
+import type { LlmGateway } from '@grimoire/llm';
 
 export interface CreateAppOptions {
   prisma: PrismaClient;

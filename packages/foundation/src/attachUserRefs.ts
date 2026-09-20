@@ -10,7 +10,7 @@
  * - No business package may depend on this file beyond the published surface area.
  * - `UserSummaryPort` is provided by composition-root injection (no direct identity coupling).
  */
-import type { UserSummaryPort } from '@core/contracts';
+import type { UserSummaryPort } from '@grimoire/contracts';
 
 export async function attachUserRefs<T, R>(
   rows: T[],

@@ -19,10 +19,10 @@ import {
   isEncryptedByokKey,
   resolveByokApiKeyToStore,
   assertSafeByokBaseUrl,
-} from '@core/foundation';
-import { API_FORMATS, type ByokConfig } from '@core/contracts';
+} from '@grimoire/foundation';
+import { API_FORMATS, type ByokConfig } from '@grimoire/contracts';
 import type { PrismaClient } from '@prisma/client';
-import type { LlmGatewayPort } from '@core/contracts';
+import type { LlmGatewayPort } from '@grimoire/contracts';
 import {
   AGENT_STYLES,
   AGENT_STYLE_LABELS,

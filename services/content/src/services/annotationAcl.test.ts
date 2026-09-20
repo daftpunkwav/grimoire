@@ -4,7 +4,7 @@ import {
   canReviewAnnotation,
   resolveReviewBy,
 } from './annotationAcl.js';
-import type { AuthUser } from '@core/foundation';
+import type { AuthUser } from '@grimoire/foundation';
 
 function user(partial: Partial<AuthUser> & Pick<AuthUser, 'id' | 'role'>): AuthUser {
   return {

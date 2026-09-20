@@ -18,15 +18,16 @@ decisions.
 | Document | Description |
 |---|---|
 | [`architecture.md`](architecture.md) | Layered architecture: capability families, dependency directions, shared vocabulary, three load-bearing mechanisms (seams-first, registered backends, single composition root). |
-| [`architecture/overview.md`](architecture/overview.md) | Concepts: workspace, service, package, port, composition root. Layer map and key invariants. |
+| [`architecture/overview.md`](architecture/overview.md) | Concepts: workspace, service, package, port, composition root. Layer map and key invariants. *Language: 简体中文 (Chinese-only historical snapshot; English version not yet translated — see [`architecture.md`](architecture.md) for the current English overview.)* |
 | [`architecture/composition-root.md`](architecture/composition-root.md) | What `services/api/src/compose.ts` wires, in what order, with which startup guards. The only place that constructs port implementations. |
 | [`architecture/data-flow.md`](architecture/data-flow.md) | End-to-end flows for hover quick-explain, panel ReAct, content CRUD, and identity bootstrap. Every hop cites the owning workspace. |
 | [`architecture/package-layout.md`](architecture/package-layout.md) | Two-level `packages/<name>/` and `services/<name>/` anatomy, dependency rules, name resolution. |
 | [`architecture/decision-register.md`](architecture/decision-register.md) | Load-bearing ADRs (decision / rationale / enforcement). New decisions are appended here, never edited in place. |
-| [`architecture/agent-modes.md`](architecture/agent-modes.md) | Dual-Agent system: hover Agent vs. panel Agent; fast-direct vs. ReAct tool-loop; caching layers. |
-| [`architecture/animation-system.md`](architecture/animation-system.md) | Animation runtime: VisualKind × template mapping; step-parametric editing (no free canvas). |
-| [`architecture/identity-permissions.md`](architecture/identity-permissions.md) | Identity, RBAC, role model (`guest / reader / author / admin`), `adminLevel` grading. |
-| [`architecture/security.md`](architecture/security.md) | Implemented / pending security checklist; cross-references [../SECURITY.md](../SECURITY.md). |
+| [`architecture/agent-modes.md`](architecture/agent-modes.md) | Dual-Agent system: hover Agent vs. panel Agent; fast-direct vs. ReAct tool-loop; caching layers. *Language: 简体中文.* |
+| [`architecture/animation-system.md`](architecture/animation-system.md) | Animation runtime: VisualKind × template mapping; step-parametric editing (no free canvas). *Language: 简体中文.* |
+| [`architecture/identity-permissions.md`](architecture/identity-permissions.md) | Identity, RBAC, role model (`guest / reader / author / admin`), `adminLevel` grading. *Language: 简体中文.* |
+| [`architecture/security.md`](architecture/security.md) | Implemented / pending security checklist; cross-references [../SECURITY.md](../SECURITY.md). *Language: 简体中文.* |
+| [`architecture/modular-monolith-microservices-review-2026-08-19.md`](architecture/modular-monolith-microservices-review-2026-08-19.md) | Architecture decision review: keep the modular monolith shape and document the criteria for splitting. *Language: 简体中文.* |
 
 ### Guides — `guides/`
 
@@ -59,9 +60,9 @@ Run-mode and on-call material.
 | [`operations/runbook.md`](operations/runbook.md) | Ports, run modes, data layout, shutdown semantics (SIGINT / SIGTERM with 5 s graceful timeout), failure modes. |
 | [`operations/quality-gates.md`](operations/quality-gates.md) | The seven gates (`boundaries`, `check:deps`, `check:exports`, `check:i18n`, `lint`, `typecheck`, `test:coverage`) — what each owns and what a failure means. |
 | [`operations/testing.md`](operations/testing.md) | Operational map for [`../../tests/README.md`](../../tests/README.md): test tiers, name resolution, coverage thresholds. |
-| [`operations/deployment.md`](operations/deployment.md) | Production topology: loopback bindings, reverse proxy + TLS, CSP, env-var audit. |
-| [`operations/postgres.md`](operations/postgres.md) | Switching dev DB to PostgreSQL (compose + `DATABASE_URL`). |
-| [`operations/multi-instance-deployment.md`](operations/multi-instance-deployment.md) | Multi-instance / horizontal-scale semantics. |
+| [`operations/deployment.md`](operations/deployment.md) | Production topology: loopback bindings, reverse proxy + TLS, CSP, env-var audit. *Language: 简体中文.* |
+| [`operations/postgres.md`](operations/postgres.md) | Switching dev DB to PostgreSQL (compose + `DATABASE_URL`). *Language: 简体中文.* |
+| [`operations/multi-instance-deployment.md`](operations/multi-instance-deployment.md) | Multi-instance / horizontal-scale semantics. *Language: 简体中文.* |
 
 ### Roadmap — `roadmap/`
 

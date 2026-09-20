@@ -10,7 +10,7 @@
  *
  * Tool registry is the only place that knows which tools the panel Agent can call.
  */
-import { logger } from '@core/foundation';
+import { logger } from '@grimoire/foundation';
 import { createGetArticleTool } from './getArticle.js';
 import { createSearchArticlesTool } from './searchArticles.js';
 import type { ArticleQueryPort } from '../../ports.js';

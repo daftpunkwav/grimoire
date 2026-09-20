@@ -10,11 +10,11 @@
  * - `searchArticles`: case-insensitive contains search over title/summary/slug with a publication-date sort.
  *
  * Boundary: only content-owned tables are touched (`Article`, `Domain`, `AnimationDef`,
- * `ArticleAnimation`, `Annotation`). Contract types live in `@core/contracts` and are
+ * `ArticleAnimation`, `Annotation`). Contract types live in `@grimoire/contracts` and are
  * re-implemented here directly so we don't redeclare the interface.
  */
 import type { PrismaClient } from '@prisma/client';
-import type { ArticleQueryPort } from '@core/contracts';
+import type { ArticleQueryPort } from '@grimoire/contracts';
 
 export type { ArticleQueryPort };
 

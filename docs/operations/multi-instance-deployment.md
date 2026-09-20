@@ -27,7 +27,7 @@
 
 ## Redis 预留
 
-`apps/api/src/app.ts` 与 `apps/api/src/routes/agent.ts` 中的 rateLimit 均使用默认 MemoryStore；
+`services/api/src/app.ts` 与 `services/api/src/routes/agent.ts` 中的 rateLimit 均使用默认 MemoryStore；
 需要跨实例一致限流/熔断时：
 
 ```ts

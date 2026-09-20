@@ -1,4 +1,4 @@
-import type { AnnotationItem } from '@core/contracts';
+import type { AnnotationItem } from '@grimoire/contracts';
 import { request } from './client.js';
 
 export const annotationsApi = {

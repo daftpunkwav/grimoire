@@ -47,6 +47,9 @@ export function resolveMessage(
 function interpolate(template: string, params: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (_match, name) => {
     if (name in params) return String(params[name]);
+    // Leave the placeholder visible so the missing-param is loud rather than
+    // silently dropped. Dev callers will also see the `⟦key⟧` from
+    // resolveMessage if the key itself is missing.
     return `{${name}}`;
   });
 }
