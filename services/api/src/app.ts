@@ -8,7 +8,7 @@
  * - Delegate per-domain router assembly to `compose.ts`, then mount each prefix; reserve `/api/v1/mcp/status` for the future MCP server.
  * - Apply the shared `errorHandler` so uncaught errors propagate through the structured error envelope.
  */
-import express from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -25,7 +25,7 @@ export interface CreateAppOptions {
   onPrefsChanged?: (info: { userId: string }) => void;
 }
 
-export function createApp(opts: CreateAppOptions) {
+export function createApp(opts: CreateAppOptions): Express {
   const app = express();
 
   // Trust the reverse proxy only when TRUST_PROXY=1 is explicitly set; keep it off on direct exposure so forged XFF headers cannot bypass the rate limiter.

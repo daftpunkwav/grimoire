@@ -15,18 +15,18 @@ type State = { hasError: boolean };
  * React 19 函数组件无法捕获渲染错误，必须是 class 组件。
  */
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     // 只进 console，不上报（项目无遥测）；name 帮助定位是哪一层边界
     console.error(`[ErrorBoundary:${this.props.name || 'anonymous'}]`, error, info.componentStack);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       if (this.props.fallback !== undefined) return this.props.fallback;
       return (

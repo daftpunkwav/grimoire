@@ -9,6 +9,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@/*": ["apps/web/src/*"],
       "@grimoire/contracts": ["packages/contracts/src/index.ts"],
       "@grimoire/foundation": ["packages/foundation/src/index.ts"],
       "@grimoire/llm": ["services/llm/src/index.ts"],
@@ -18,7 +19,9 @@
       "@grimoire/agent": ["services/agent/src/index.ts"],
       "@grimoire/api/*": ["services/api/src/*"],
       "@grimoire/web/*": ["apps/web/src/*"]
-    }
+    },
+    "noUncheckedIndexedAccess": false,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": [
     "tests",

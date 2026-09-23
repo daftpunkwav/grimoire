@@ -7,14 +7,17 @@
  *   is type-pinned against, while `zh-CN` is the source of truth
  * - Define the `t()` function shape: dot-key lookup, `{param}` interpolation,
  *   explicit fallback chain
+ *
+ * Notes:
+ * - Catalogs may nest to any depth (e.g. `agentHover.fail.retry`); leaves are
+ *   messages (string or parametrized function), interior nodes are groups.
+ *   `resolveMessage` walks dot-keys through that structure.
  */
 
-export type MessageValue = string;
+export type MessageValue = string | ((params: Record<string, string | number>) => string);
 
 export type MessageCatalog = {
-  readonly [namespace: string]: {
-    readonly [key: string]: MessageValue | ((params: Record<string, string | number>) => string);
-  };
+  readonly [key: string]: MessageCatalog | MessageValue;
 };
 
 /**
