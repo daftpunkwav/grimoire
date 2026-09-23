@@ -81,6 +81,10 @@ jobs:
           --health-retries 10
     env:
       # CI-only throwaway values; the smoke probe is read-only.
+      # NODE_ENV=production boots the deployed shape (docker-compose parity):
+      # JSON logs without the dev-only pino-pretty transport, which is not
+      # resolvable from @grimoire/foundation under pnpm's strict layout.
+      NODE_ENV: production
       JWT_SECRET: ci-smoke-jwt-secret-0123456789abcdef
       DATABASE_URL: postgresql://grimoire:grimoire-ci@127.0.0.1:5432/grimoire?schema=public
       PORT: 8181
