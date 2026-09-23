@@ -107,7 +107,7 @@ jobs:
       - name: Verify database connectivity
         working-directory: services/api
         run: |
-          cat > /tmp/dbcheck.mjs <<'EOF'
+          cat > dbcheck.tmp.mjs <<'EOF'
           import { PrismaClient } from '@prisma/client';
           const p = new PrismaClient();
           try {
@@ -120,7 +120,8 @@ jobs:
             await p.$disconnect();
           }
           EOF
-          node /tmp/dbcheck.mjs
+          node dbcheck.tmp.mjs
+          rm dbcheck.tmp.mjs
 
       - name: Build API and its workspace dependencies
         run: pnpm --filter @grimoire/api... build
