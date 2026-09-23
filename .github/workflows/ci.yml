@@ -2,8 +2,9 @@
 #
 # - `verify` job: the repo gate chain (`pnpm verify`) on windows-latest,
 #   the reference platform — Win32-gated security suites must not skip.
-# - `smoke` job: boots the built API binary against a real Postgres and
-#   probes /health, /ready, and the request pipeline end to end (read-only).
+# - `smoke` job: boots the built API binary (SQLite, the repo's dev-default
+#   database) and probes /health, /ready, and the request pipeline end to end
+#   (read-only).
 #
 # Not wired yet: `pnpm check:i18n` (the web i18n gate) — components still
 # carry inline CJK copy pending catalog extraction; wire it into this
@@ -65,28 +66,16 @@ jobs:
 
   smoke:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: grimoire
-          POSTGRES_PASSWORD: grimoire-ci
-          POSTGRES_DB: grimoire
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U grimoire -d grimoire"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
     env:
       # CI-only throwaway values; the smoke probe is read-only.
-      # NODE_ENV=production boots the deployed shape (docker-compose parity):
+      # DATABASE_URL follows the repo's dev default (SQLite, see .env.example
+      # and docs/operations/postgres.md — PostgreSQL is a deployment-time
+      # provider switch). NODE_ENV=production boots the deployed log shape:
       # JSON logs without the dev-only pino-pretty transport, which is not
       # resolvable from @grimoire/foundation under pnpm's strict layout.
       NODE_ENV: production
       JWT_SECRET: ci-smoke-jwt-secret-0123456789abcdef
-      DATABASE_URL: postgresql://grimoire:grimoire-ci@127.0.0.1:5432/grimoire?schema=public
+      DATABASE_URL: "file:./dev.db"
       PORT: 8181
     steps:
       - uses: actions/checkout@v4
