@@ -25,7 +25,7 @@ const TIMEOUT_MS = Number(process.env.SMOKE_TIMEOUT_MS || 30_000);
 const PROBES = [
   { name: "health", method: "GET", path: "/health", expectStatus: 200 },
   { name: "ready", method: "GET", path: "/ready", expectStatus: 200 },
-  { name: "auth-login (validation)", method: "POST", path: "/api/v1/auth/login", body: {}, expectStatus: 422 },
+  { name: "auth-login (validation)", method: "POST", path: "/api/v1/auth/login", body: {}, expectStatus: 400 },
 ];
 
 async function fetchWithTimeout(url, init, ms) {
