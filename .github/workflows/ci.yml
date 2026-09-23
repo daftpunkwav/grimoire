@@ -104,6 +104,24 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @grimoire/api db:generate
 
+      - name: Verify database connectivity
+        working-directory: services/api
+        run: |
+          cat > /tmp/dbcheck.mjs <<'EOF'
+          import { PrismaClient } from '@prisma/client';
+          const p = new PrismaClient();
+          try {
+            await p.$queryRawUnsafe('SELECT 1');
+            console.log('DB OK');
+          } catch (e) {
+            console.error('DB FAIL:', e.constructor.name, '|', e.message);
+            process.exit(1);
+          } finally {
+            await p.$disconnect();
+          }
+          EOF
+          node /tmp/dbcheck.mjs
+
       - name: Build API and its workspace dependencies
         run: pnpm --filter @grimoire/api... build
 
