@@ -39,7 +39,8 @@ pnpm --filter @grimoire/web check:i18n     # web i18n 门禁,改动前端文案�
 各门禁的职责与失败含义见
 [docs/operations/quality-gates.md](docs/operations/quality-gates.md)。CI 在
 `windows-latest` 上运行同一组门禁,外加一个 `smoke` job:启动真实的 server
-二进制并做 HTTP 探测。
+二进制并做 HTTP 探测。`check:i18n` 门禁在其余内联中文文案完成 catalog 抽取
+前暂只做本地门禁。
 
 ## 测试
 

@@ -100,3 +100,8 @@ string to the `zh-CN` catalog and read it through `useT()`.
 plus a `smoke` job that boots `services/api` and probes it with
 `pnpm smoke`. The `smoke` job is the only place a server process is
 started in CI; the rest of the pipeline runs unit tests only.
+
+Current status: the `check:i18n` gate is **not wired into CI yet** —
+web components still carry inline CJK copy pending catalog extraction.
+It stays a local gate (`pnpm check:i18n`); wire it into the workflow
+once it exits 0 locally.

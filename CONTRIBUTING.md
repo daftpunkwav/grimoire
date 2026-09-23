@@ -43,7 +43,8 @@ pnpm --filter @grimoire/web check:i18n     # web i18n gate, after front-end copy
 What each gate owns and what a failure means:
 [docs/operations/quality-gates.md](docs/operations/quality-gates.md). CI runs
 the same gates on `windows-latest`, plus a `smoke` job that boots the real
-server binary and probes it over HTTP.
+server binary and probes it over HTTP. The `check:i18n` gate is local-only
+until the remaining inline CJK copy is catalogued.
 
 ## Tests
 

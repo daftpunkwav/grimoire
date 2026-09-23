@@ -88,3 +88,7 @@ CI 在 `windows-latest` 上运行的七大门禁。每个门禁负责一件事;�
 `.github/workflows/ci.yml` 在 `windows-latest` 上运行同一组门禁,外加一个
 `smoke` job:启动 `services/api` 并用 `pnpm smoke` 探测。`smoke` job 是 CI
 中唯一启动 server 进程的位置;其余流水线仅跑单元测试。
+
+当前状态:`check:i18n` 门禁**暂未接入 CI**——web 组件仍有待抽取进 catalog
+的内联中文文案。它目前只是本地门禁(`pnpm check:i18n`),待其在本地通过后
+再接入 workflow。
