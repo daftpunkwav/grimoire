@@ -1,0 +1,119 @@
+# Quality gates + smoke probe, per CONTRIBUTING.md.
+#
+# - `verify` job: the repo gate chain (`pnpm verify`) on windows-latest,
+#   the reference platform — Win32-gated security suites must not skip.
+# - `smoke` job: boots the built API binary against a real Postgres and
+#   probes /health, /ready, and the request pipeline end to end (read-only).
+#
+# Not wired yet: `pnpm check:i18n` (the web i18n gate) — components still
+# carry inline CJK copy pending catalog extraction; wire it into this
+# workflow once `pnpm check:i18n` exits 0 locally.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @grimoire/api db:generate
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Typecheck tests
+        run: pnpm typecheck:tests
+
+      - name: Unit tests + coverage gate
+        run: pnpm test:coverage
+
+      - name: Boundary scan
+        run: pnpm boundaries
+
+      - name: Dependency honesty scan
+        run: pnpm check:deps
+
+      - name: Export coverage scan
+        run: pnpm check:exports
+
+      - name: Lint
+        run: pnpm lint
+
+  smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: grimoire
+          POSTGRES_PASSWORD: grimoire-ci
+          POSTGRES_DB: grimoire
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U grimoire -d grimoire"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # CI-only throwaway values; the smoke probe is read-only.
+      JWT_SECRET: ci-smoke-jwt-secret-0123456789abcdef
+      DATABASE_URL: postgresql://grimoire:grimoire-ci@127.0.0.1:5432/grimoire?schema=public
+      PORT: 8181
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @grimoire/api db:generate
+
+      - name: Build API
+        run: pnpm --filter @grimoire/api build
+
+      - name: Start API
+        run: |
+          node services/api/dist/index.js &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8181/health > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API did not become healthy within 30s" >&2
+          exit 1
+
+      - name: Smoke probe
+        run: node scripts/smoke.mjs
