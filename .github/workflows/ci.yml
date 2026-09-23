@@ -114,7 +114,12 @@ jobs:
             await p.$queryRawUnsafe('SELECT 1');
             console.log('DB OK');
           } catch (e) {
-            console.error('DB FAIL:', e.constructor.name, '|', e.message);
+            console.error('DB FAIL:', JSON.stringify({
+              code: e.code,
+              message: e.message,
+              meta: e.meta,
+              stack: (e.stack || '').split('\n').slice(0, 5),
+            }, null, 2));
             process.exit(1);
           } finally {
             await p.$disconnect();
