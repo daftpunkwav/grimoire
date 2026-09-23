@@ -8,6 +8,7 @@
     "build": "cross-env NODE_ENV=production tsc -b && cross-env NODE_ENV=production vite build",
     "typecheck": "tsc -b",
     "lint": "oxlint",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "preview": "cross-env NODE_ENV=production vite preview",
     "test": "vitest run"
   },

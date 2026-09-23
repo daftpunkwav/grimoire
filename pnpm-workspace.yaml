@@ -12,3 +12,9 @@ saveWorkspaceProtocol: true
 
 # Allow native builds for the small set of packages that need them
 onlyBuiltDependencies: []
+
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true

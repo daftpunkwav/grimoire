@@ -29,8 +29,8 @@
     "check:deps": "node scripts/check-package-deps.mjs",
     "check:exports": "node scripts/check-export-tests.mjs",
     "check:i18n": "pnpm --filter @grimoire/web check:i18n",
-    "lint": "pnpm -r lint --if-present",
-    "verify": "pnpm -r build && pnpm -r typecheck && pnpm typecheck:tests && pnpm test:coverage && pnpm boundaries && pnpm check:deps && pnpm check:exports && pnpm --filter @grimoire/web check:i18n"
+    "lint": "pnpm -r --if-present lint",
+    "verify": "pnpm -r build && pnpm -r typecheck && pnpm typecheck:tests && pnpm test:coverage && pnpm boundaries && pnpm check:deps && pnpm check:exports && pnpm lint"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
