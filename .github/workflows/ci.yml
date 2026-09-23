@@ -100,8 +100,8 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @grimoire/api db:generate
 
-      - name: Build API
-        run: pnpm --filter @grimoire/api build
+      - name: Build API and its workspace dependencies
+        run: pnpm --filter @grimoire/api... build
 
       - name: Start API
         run: |
